@@ -1,6 +1,6 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <item>
-	<version>1.12.5</version>
+	<version>1.12.6</version>
 	<url>https://github.com/derekbibiano03/InventarioEnlaceFerroviario/releases/latest/download/InventarioSetup.zip</url>
 	<changelog>https://github.com/derekbibiano03/InventarioEnlaceFerroviario/releases</changelog>
 	<mandatory>false</mandatory>
