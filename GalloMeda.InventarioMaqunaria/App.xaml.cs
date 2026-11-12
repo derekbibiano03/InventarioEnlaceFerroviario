@@ -27,9 +27,6 @@ namespace GalloMeda.InventarioMaqunaria
         {
             base.OnStartup(e);
 
-            AutoUpdater.ApplicationExitEvent += AutoUpdater_ApplicationExitEvent;
-            AutoUpdater.Start("https://raw.githubusercontent.com/derekbibiano03/Inventario/master/update.xml");
-
             AppDomain.CurrentDomain.UnhandledException += (sender, args) =>
             {
                 Exception ex = (Exception)args.ExceptionObject;
@@ -41,38 +38,39 @@ namespace GalloMeda.InventarioMaqunaria
                 string basePath = AppDomain.CurrentDomain.BaseDirectory;
                 string configPath = Path.Combine(basePath, "appsettings.json");
 
-                // Verificar si existe el archivo de configuración para asegurar la estructura de AzureAd
-                if (File.Exists(configPath))
+                // 1. Validar que el archivo exista antes de intentar leerlo
+                if (!File.Exists(configPath))
                 {
-                    string jsonContent = File.ReadAllText(configPath);
-                    var jsonObject = JObject.Parse(jsonContent);
-
-                    if (jsonObject["AzureAd"] == null)
-                    {
-                        jsonObject["AzureAd"] = new JObject(
-                            new JProperty("TenantId", ""),
-                            new JProperty("ClientId", ""),
-                            new JProperty("ClientSecret", ""),
-                            new JProperty("Remitente", "")
-                        );
-                        File.WriteAllText(configPath, jsonObject.ToString(Newtonsoft.Json.Formatting.Indented));
-                    }
+                    throw new FileNotFoundException("No se encontró el archivo de configuración 'appsettings.json' en la carpeta del programa.");
                 }
 
+                // 2. Cargar configuración
                 var builder = new ConfigurationBuilder()
                     .SetBasePath(basePath)
                     .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true);
 
                 IConfiguration configuration = builder.Build();
 
-                var serviceCollection = new ServiceCollection();
+                // 3. Configurar AutoUpdater para repositorio PRIVADO
+                string? githubToken = configuration["GitHubUpdate:Token"];
+                string? updateXmlUrl = configuration["GitHubUpdate:XmlUrl"];
 
+                if (!string.IsNullOrWhiteSpace(githubToken) && !string.IsNullOrWhiteSpace(updateXmlUrl))
+                {
+                    var auth = new BasicAuthentication("derekbibiano03", githubToken);
+                    AutoUpdater.BasicAuthXML = auth;
+                    AutoUpdater.BasicAuthDownload = auth;
+                    AutoUpdater.ApplicationExitEvent += AutoUpdater_ApplicationExitEvent;
+                    AutoUpdater.Start(updateXmlUrl);
+                }
+
+                // 4. Configurar Base de Datos y Servicios
+                var serviceCollection = new ServiceCollection();
                 var connectionString = configuration.GetConnectionString("InventarioConnection");
 
-                // Validación explícita para evitar el error de índice 0
                 if (string.IsNullOrWhiteSpace(connectionString))
                 {
-                    throw new InvalidOperationException("La cadena de conexión 'InventarioConnection' está vacía o no se pudo leer del archivo appsettings.json.");
+                    throw new InvalidOperationException("La cadena de conexión 'InventarioConnection' está vacía en appsettings.json.");
                 }
 
                 serviceCollection.AddDbContext<InventarioContext>(options =>
@@ -86,6 +84,7 @@ namespace GalloMeda.InventarioMaqunaria
 
                 ServiceProvider = serviceCollection.BuildServiceProvider();
 
+                // 5. Iniciar ventana de Login
                 using (var scope = ServiceProvider.CreateScope())
                 {
                     var context = scope.ServiceProvider.GetRequiredService<InventarioContext>();
@@ -104,8 +103,6 @@ namespace GalloMeda.InventarioMaqunaria
                         string usuarioConfirmado = App.Session.Username;
                         int idRolUsuario = App.Session.IdRol;
                         string NombreCompleto = App.Session.NombreCompleto;
-                        string FirmaPath = App.Session.FirmaPath;
-                        string Correoe = App.Session.Correoe;
                         var mainWindow = new MainWindow(usuarioConfirmado, idRolUsuario, NombreCompleto);
                         this.MainWindow = mainWindow;
                         this.ShutdownMode = ShutdownMode.OnMainWindowClose;
