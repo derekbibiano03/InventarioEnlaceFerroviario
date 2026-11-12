@@ -54,11 +54,12 @@ jobs:
         "@
         Set-Content -Path "./deploy_temp/update.xml" -Value $xmlContent -Encoding UTF8
 
-    - name: Subir archivos a cPanel via FTP
-      uses: SamKirkland/FTP-Deploy-Action@v4.3.5
+    - name: Subir archivos a cPanel via SFTP
+      uses: cross-the-world/ssh-scp-ssh-pipelines@latest
       with:
-        server: ${{ secrets.FTP_SERVER }}
-        username: ${{ secrets.FTP_USERNAME }}
-        password: ${{ secrets.FTP_PASSWORD }}
-        local-dir: ./deploy_temp/
-        server-dir: ./public_html/updates/
+        host: ${{ secrets.FTP_SERVER }}
+        user: ${{ secrets.FTP_USERNAME }}
+        pass: ${{ secrets.FTP_PASSWORD }}
+        port: 22
+        local: './deploy_temp/*'
+        remote: './public_html/updates/'
