@@ -10,7 +10,7 @@
         WindowState="Maximized"
         WindowStartupLocation="CenterScreen"
         Icon="/Resources/icono.ico"
-        Title="Inventario Maquinaria VERSION 1.12.12" Height="450" Width="800">
+        Title="Inventario Maquinaria VERSION 1.12.13" Height="450" Width="800">
     <Window.Resources>
         <converters:RolToVisibilityConverter x:Key="RolToVisibilityConverter"/>
     </Window.Resources>
