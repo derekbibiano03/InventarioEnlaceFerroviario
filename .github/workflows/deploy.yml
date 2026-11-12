@@ -32,15 +32,12 @@ jobs:
     - name: Comprimir ejecutable
       run: Compress-Archive -Path ./publish/* -DestinationPath ./InventarioSetup.zip
 
-    - name: Leer version del csproj y generar update.xml
-      id: version
+    - name: Leer version y preparar archivos
       run: |
         [xml]$csproj = Get-Content GalloMeda.InventarioMaqunaria/Inventario.Desktop.csproj
         $ver = $csproj.Project.PropertyGroup.Version
-        echo "version=$ver" >> $env:GITHUB_OUTPUT
         
         New-Item -ItemType Directory -Force -Path ./deploy_temp
-        
         Move-Item -Path ./InventarioSetup.zip -Destination ./deploy_temp/InventarioSetup.zip
         
         $xmlContent = @"
@@ -54,13 +51,12 @@ jobs:
         "@
         Set-Content -Path "./deploy_temp/update.xml" -Value $xmlContent -Encoding UTF8
 
-    - name: Subir archivos a cPanel via SFTP
-      uses: appleboy/scp-action@v0.1.7
+    - name: Subir archivos a cPanel via FTP
+      uses: SamKirkland/FTP-Deploy-Action@v4.3.5
       with:
-        host: ${{ secrets.FTP_SERVER }}
+        server: ${{ secrets.FTP_SERVER }}
         username: ${{ secrets.FTP_USERNAME }}
         password: ${{ secrets.FTP_PASSWORD }}
-        port: 22
-        source: "deploy_temp/*"
-        target: "./public_html/updates/"
-        strip_components: 1
+        local-dir: ./deploy_temp/
+        server-dir: ./public_html/updates/
+        protocol: ftp
