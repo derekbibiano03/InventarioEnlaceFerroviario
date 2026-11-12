@@ -11,7 +11,7 @@
     <Grid>
 
         <StackPanel VerticalAlignment="Center" Width="400">
-            <TextBlock Style="{StaticResource TextoGeneral}" Text="INVENTARIO MAQUINARIA GALLO MEDA" FontSize="22" FontWeight="Bold" Margin="0,0,0,20" HorizontalAlignment="Center" Foreground="#1A365D"/>
+            <TextBlock Style="{StaticResource TextoGeneral}" Text="INVENTARIO MAQ. ENLACE FERROVIARIO" FontSize="22" FontWeight="Bold" Margin="0,0,0,20" HorizontalAlignment="Center" Foreground="#1A365D"/>
 
             <TextBlock Style="{StaticResource TextoGeneral}" Text="Usuario:" FontWeight="SemiBold" Margin="0,0,5,5" Foreground="#4A5568" />
             <TextBox Text="{Binding Usuario, UpdateSourceTrigger=PropertyChanged}" Margin="0,0,0,15" Height="30" VerticalContentAlignment="Center" Padding="5,0,0,0"/>
@@ -23,7 +23,7 @@
             <TextBlock Style="{StaticResource TextoGeneral}" 
            FontSize="14" 
            TextWrapping="Wrap" 
-           Text="Cualquier duda sugerencia o problema contactar al correo dbibiano@enlaceferroviario.com (Version 1.11.5)" 
+           Text="Cualquier duda sugerencia o problema contactar al correo dbibiano@enlaceferroviario.com (Version 1.12.0)" 
            Margin="0,0,5,5" 
            Foreground="#4A5568" />
         </StackPanel>

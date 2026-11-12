@@ -38,3 +38,5 @@ bld/
 [Oo]bj/
 [Ll]og/
 [Ll]ogs/
+
+!Inventario.Core/Services/Logs/
