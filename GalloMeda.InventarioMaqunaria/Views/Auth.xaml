@@ -23,7 +23,7 @@
             <TextBlock Style="{StaticResource TextoGeneral}" 
            FontSize="14" 
            TextWrapping="Wrap" 
-           Text="Cualquier duda sugerencia o problema contactar al correo dbibiano@enlaceferroviario.com (Version 1.12.1)" 
+           Text="Cualquier duda sugerencia o problema contactar al correo dbibiano@enlaceferroviario.com (Version 1.12.2)" 
            Margin="0,0,5,5" 
            Foreground="#4A5568" />
         </StackPanel>
