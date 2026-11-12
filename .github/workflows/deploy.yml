@@ -1,4 +1,4 @@
-name: Compilar y Publicar Actualizacion
+name: Compilar y Publicar en cPanel
 
 on:
   push:
@@ -6,7 +6,7 @@ on:
       - main
 
 jobs:
-  build:
+  build-and-deploy:
     runs-on: windows-latest
 
     steps:
@@ -39,11 +39,14 @@ jobs:
         $ver = $csproj.Project.PropertyGroup.Version
         echo "version=$ver" >> $env:GITHUB_OUTPUT
 
-    - name: Publicar Release en GitHub
-      uses: softprops/action-gh-release@v2
+    - name: Subir archivos a cPanel via FTP
+      uses: SamKirkland/FTP-Deploy-Action@v4
       with:
-        files: ./InventarioSetup.zip
-        tag_name: v${{ steps.version.outputs.version }}
-        name: Versión ${{ steps.version.outputs.version }}
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        server: ${{ secrets.FTP_SERVER }}
+        username: ${{ secrets.FTP_USERNAME }}
+        password: ${{ secrets.FTP_PASSWORD }}
+        local-dir: ./
+        server-dir: ./public_html/updates/
+        include: |
+          InventarioSetup.zip
+          update.xml
