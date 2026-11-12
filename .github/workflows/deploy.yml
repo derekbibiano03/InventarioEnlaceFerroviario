@@ -32,12 +32,27 @@ jobs:
     - name: Comprimir ejecutable
       run: Compress-Archive -Path ./publish/* -DestinationPath ./InventarioSetup.zip
 
-    - name: Leer version del csproj
+    - name: Leer version del csproj y generar update.xml
       id: version
       run: |
         [xml]$csproj = Get-Content GalloMeda.InventarioMaqunaria/Inventario.Desktop.csproj
         $ver = $csproj.Project.PropertyGroup.Version
         echo "version=$ver" >> $env:GITHUB_OUTPUT
+        
+        New-Item -ItemType Directory -Force -Path ./deploy_temp
+        
+        Move-Item -Path ./InventarioSetup.zip -Destination ./deploy_temp/InventarioSetup.zip
+        
+        $xmlContent = @"
+        <?xml version="1.0" encoding="utf-8"?>
+        <item>
+            <version>$ver</version>
+            <url>https://enlaceferroviario.com/updates/InventarioSetup.zip</url>
+            <changelog>https://github.com/derekbibiano03/InventarioEnlaceFerroviario/releases</changelog>
+            <mandatory>false</mandatory>
+        </item>
+        "@
+        Set-Content -Path "./deploy_temp/update.xml" -Value $xmlContent -Encoding UTF8
 
     - name: Subir archivos a cPanel via FTP
       uses: SamKirkland/FTP-Deploy-Action@v4.3.5
@@ -45,8 +60,5 @@ jobs:
         server: ${{ secrets.FTP_SERVER }}
         username: ${{ secrets.FTP_USERNAME }}
         password: ${{ secrets.FTP_PASSWORD }}
-        local-dir: ./
+        local-dir: ./deploy_temp/
         server-dir: ./public_html/updates/
-        include: |
-          InventarioSetup.zip
-          update.xml
