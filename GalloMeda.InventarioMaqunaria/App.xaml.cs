@@ -38,26 +38,32 @@ namespace GalloMeda.InventarioMaqunaria
                 string basePath = AppDomain.CurrentDomain.BaseDirectory;
                 string configPath = Path.Combine(basePath, "appsettings.json");
 
-                // 1. Validar que el archivo exista antes de intentar leerlo
                 if (!File.Exists(configPath))
                 {
                     throw new FileNotFoundException("No se encontró el archivo de configuración 'appsettings.json' en la carpeta del programa.");
                 }
 
-                // 2. Cargar configuración
                 var builder = new ConfigurationBuilder()
                     .SetBasePath(basePath)
                     .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true);
 
                 IConfiguration configuration = builder.Build();
 
-                // 3. Configurar AutoUpdater (Público desde GitHub Releases)
+                // 3. Configurar AutoUpdater
                 string? updateXmlUrl = configuration["GitHubUpdate:XmlUrl"];
 
                 if (!string.IsNullOrWhiteSpace(updateXmlUrl))
                 {
+                    // Usamos Synchronous = true para que compruebe al iniciar de manera controlada
+                    AutoUpdater.Synchronous = true;
                     AutoUpdater.ApplicationExitEvent += AutoUpdater_ApplicationExitEvent;
                     AutoUpdater.Start(updateXmlUrl);
+                }
+
+                // Si AutoUpdater programa un cierre para actualizar, evitamos que siga ejecutando el Login
+                if (Environment.HasShutdownStarted)
+                {
+                    return;
                 }
 
                 // 4. Configurar Base de Datos y Servicios
