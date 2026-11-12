@@ -52,10 +52,14 @@ namespace GalloMeda.InventarioMaqunaria
                 IConfiguration configuration = builder.Build();
 
                 // 3. Configurar AutoUpdater (Público desde GitHub Releases)
+                string? githubToken = configuration["GitHubUpdate:Token"];
                 string? updateXmlUrl = configuration["GitHubUpdate:XmlUrl"];
 
-                if (!string.IsNullOrWhiteSpace(updateXmlUrl))
+                if (!string.IsNullOrWhiteSpace(githubToken) && !string.IsNullOrWhiteSpace(updateXmlUrl))
                 {
+                    var auth = new BasicAuthentication("derekbibiano03", githubToken);
+                    AutoUpdater.BasicAuthXML = auth;
+                    AutoUpdater.BasicAuthDownload = auth;
                     AutoUpdater.ApplicationExitEvent += AutoUpdater_ApplicationExitEvent;
                     AutoUpdater.Start(updateXmlUrl);
                 }
