@@ -1,0 +1,349 @@
+﻿<UserControl x:Class="Inventario.Desktop.Views.UserControllers.Economicos.InfoEconomicos.MostrarResguardosView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:Inventario.Desktop.Views.UserControllers.Economicos.InfoEconomicos"
+             mc:Ignorable="d" 
+             d:DesignHeight="450" d:DesignWidth="800">
+    <UserControl.Resources>
+        <Style TargetType="DataGridColumnHeader">
+            <Setter Property="Background" Value="#1E293B"/>
+            <Setter Property="Foreground" Value="White"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+            <Setter Property="FontSize" Value="12"/>
+            <Setter Property="Height" Value="40"/>
+            <Setter Property="Padding" Value="10,0"/>
+            <Setter Property="HorizontalContentAlignment" Value="Center"/>
+            <Setter Property="VerticalContentAlignment" Value="Center"/>
+            <Setter Property="BorderThickness" Value="0,0,1,0"/>
+            <Setter Property="BorderBrush" Value="#334155"/>
+        </Style>
+
+        <!-- Estilo base para las celdas individuales del DataGrid -->
+        <Style TargetType="DataGridCell">
+            <Setter Property="Padding" Value="8,8"/>
+            <!-- Relleno interno de las celdas -->
+            <Setter Property="Template">
+                <Setter.Value>
+                    <!-- Plantilla de control para renderizar la celda -->
+                    <ControlTemplate TargetType="DataGridCell">
+                        <Border Padding="{TemplateBinding Padding}" 
+                            Background="{TemplateBinding Background}" 
+                            BorderThickness="0">
+                            <!-- Presentador del contenido de la celda -->
+                            <ContentPresenter VerticalAlignment="Center" />
+                        </Border>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+            <Style.Triggers>
+                <!-- Disparador para resaltar la fila/celda seleccionada -->
+                <Trigger Property="IsSelected" Value="True">
+                    <Setter Property="Background" Value="#E2E8F0"/>
+                    <Setter Property="Foreground" Value="#0F172A"/>
+                </Trigger>
+            </Style.Triggers>
+        </Style>
+
+        <!-- Estilo para los hipervínculos de archivos descargables/abribles -->
+        <Style x:Key="BtnLinkArchivo" TargetType="Button">
+            <Setter Property="Foreground" Value="#0284C7"/>
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="HorizontalAlignment" Value="Left"/>
+            <Setter Property="Margin" Value="0,2"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <TextBlock Text="{TemplateBinding Content}" 
+                               TextDecorations="Underline" 
+                               Foreground="{TemplateBinding Foreground}"/>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+            <Style.Triggers>
+                <Trigger Property="IsMouseOver" Value="True">
+                    <Setter Property="Foreground" Value="#0369A1"/>
+                </Trigger>
+            </Style.Triggers>
+        </Style>
+
+        <!-- Estilo para el ajuste de texto en celdas de texto largo -->
+        <Style x:Key="WrappedTextBlockStyle" TargetType="TextBlock">
+            <Setter Property="TextWrapping" Value="Wrap"/>
+        </Style>
+
+        <!-- NUEVO RECURSO: Estilo visual para el botón de Editar Registro en la tabla -->
+        <!-- Estilo visual para un botón de tabla con apariencia real -->
+        <Style x:Key="BtnTablaEditar" TargetType="Button">
+            <Setter Property="Background" Value="#F59E0B"/>
+            <Setter Property="Foreground" Value="White"/>
+            <Setter Property="BorderBrush" Value="#D97706"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="Padding" Value="12,5"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+            <Setter Property="FontSize" Value="12"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="HorizontalContentAlignment" Value="Center"/>
+            <Setter Property="VerticalContentAlignment" Value="Center"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <!-- Borde con efecto de botón real (sombra interna/externa y esquina suave) -->
+                        <Border x:Name="border" 
+                    Background="{TemplateBinding Background}" 
+                    BorderBrush="{TemplateBinding BorderBrush}" 
+                    BorderThickness="{TemplateBinding BorderThickness}" 
+                    CornerRadius="4" 
+                    SnapsToDevicePixels="True">
+                            <Border.Effect>
+                                <DropShadowEffect BlurRadius="3" Color="Black" Opacity="0.15" Direction="270" ShadowDepth="1"/>
+                            </Border.Effect>
+
+                            <ContentPresenter x:Name="contentPresenter" 
+                                  Focusable="False" 
+                                  HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}" 
+                                  Margin="{TemplateBinding Padding}" 
+                                  RecognizesAccessKey="True" 
+                                  SnapsToDevicePixels="{TemplateBinding SnapsToDevicePixels}" 
+                                  VerticalAlignment="{TemplateBinding VerticalContentAlignment}"/>
+                        </Border>
+
+                        <ControlTemplate.Triggers>
+                            <!-- Efecto Hover: Oscurece el botón al pasar el cursor -->
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter Property="Background" TargetName="border" Value="#D97706"/>
+                                <Setter Property="BorderBrush" TargetName="border" Value="#B45309"/>
+                            </Trigger>
+
+                            <!-- Efecto Click (Pressed): Se hunde ligeramente y cambia de color al presionar -->
+                            <Trigger Property="IsPressed" Value="True">
+                                <Setter Property="Background" TargetName="border" Value="#B45309"/>
+                                <Setter Property="BorderBrush" TargetName="border" Value="#78350F"/>
+                                <Setter Property="Effect" TargetName="border">
+                                    <Setter.Value>
+                                        <DropShadowEffect BlurRadius="1" Color="Black" Opacity="0.1" Direction="270" ShadowDepth="0"/>
+                                    </Setter.Value>
+                                </Setter>
+                            </Trigger>
+
+                            <!-- Estado Deshabilitado -->
+                            <Trigger Property="IsEnabled" Value="False">
+                                <Setter Property="Background" TargetName="border" Value="#E2E8F0"/>
+                                <Setter Property="BorderBrush" TargetName="border" Value="#CBD5E1"/>
+                                <Setter Property="Foreground" Value="#94A3B8"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <!-- Estilo visual para el botón de Eliminar en la tabla (Rojo/Peligro) -->
+        <Style x:Key="BtnTablaEliminar" TargetType="Button">
+            <Setter Property="Background" Value="#EF4444"/>
+            <Setter Property="Foreground" Value="White"/>
+            <Setter Property="BorderBrush" Value="#DC2626"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="Padding" Value="12,5"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+            <Setter Property="FontSize" Value="12"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="HorizontalContentAlignment" Value="Center"/>
+            <Setter Property="VerticalContentAlignment" Value="Center"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border x:Name="border" 
+                    Background="{TemplateBinding Background}" 
+                    BorderBrush="{TemplateBinding BorderBrush}" 
+                    BorderThickness="{TemplateBinding BorderThickness}" 
+                    CornerRadius="4" 
+                    SnapsToDevicePixels="True">
+                            <Border.Effect>
+                                <DropShadowEffect BlurRadius="3" Color="Black" Opacity="0.15" Direction="270" ShadowDepth="1"/>
+                            </Border.Effect>
+
+                            <ContentPresenter x:Name="contentPresenter" 
+                                  Focusable="False" 
+                                  HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}" 
+                                  Margin="{TemplateBinding Padding}" 
+                                  RecognizesAccessKey="True" 
+                                  SnapsToDevicePixels="{TemplateBinding SnapsToDevicePixels}" 
+                                  VerticalAlignment="{TemplateBinding VerticalContentAlignment}"/>
+                        </Border>
+
+                        <ControlTemplate.Triggers>
+                            <!-- Hover: Rojo más oscuro -->
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter Property="Background" TargetName="border" Value="#DC2626"/>
+                                <Setter Property="BorderBrush" TargetName="border" Value="#B91C1C"/>
+                            </Trigger>
+                            <!-- Click: Transición hundida al presionar -->
+                            <Trigger Property="IsPressed" Value="True">
+                                <Setter Property="Background" TargetName="border" Value="#B91C1C"/>
+                                <Setter Property="BorderBrush" TargetName="border" Value="#991B1B"/>
+                                <Setter Property="Effect" TargetName="border">
+                                    <Setter.Value>
+                                        <DropShadowEffect BlurRadius="1" Color="Black" Opacity="0.1" Direction="270" ShadowDepth="0"/>
+                                    </Setter.Value>
+                                </Setter>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+    </UserControl.Resources>
+
+    <!-- Contenedor principal de la vista con fondo claro -->
+    <Grid Background="#F8FAFC">
+        <Grid Margin="24">
+            <Grid.RowDefinitions>
+                <!-- FILA 0: BARRA SUPERIOR DE FILTRADO -->
+                <RowDefinition Height="Auto"/>
+                <!-- FILA 1: DATAGRID CON EL HISTORIAL -->
+                <RowDefinition Height="*"/>
+            </Grid.RowDefinitions>
+
+            <!-- PANEL DE BUSQUEDA POR ID ECONOMICO -->
+            <StackPanel Grid.Row="0" Orientation="Horizontal" Margin="0,0,0,16">
+                <!-- Etiqueta informativa del campo de búsqueda -->
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition />
+                        <ColumnDefinition />
+                    </Grid.ColumnDefinitions>
+                    <Grid.RowDefinitions>
+                        <RowDefinition/>
+                        <RowDefinition/>
+                    </Grid.RowDefinitions>
+                    <TextBlock Grid.Column="0" Grid.Row="0" Text="Buscar por ID Económico:" 
+                   VerticalAlignment="Center" 
+                   FontWeight="SemiBold" 
+                   Margin="0,0,10,0" 
+                   Foreground="#334155"/>
+                    <!-- Campo de entrada de texto para filtrar los datos en tiempo real -->
+                    <TextBox Grid.Column="0" Grid.Row="1" Width="200" 
+                     Height="32" 
+                     VerticalContentAlignment="Center" 
+                     Padding="5,0"
+                     Text="{Binding FiltroNoEconomico, UpdateSourceTrigger=PropertyChanged}"/>
+
+                    <Button Content="Exportar a Excel" 
+                        Margin="25,5,0,5"
+                        Grid.Column="1" Grid.Row="1"
+                    Command="{Binding ExportarExcelCommand}"
+                    Background="#10B981" 
+                    Foreground="White" 
+                    FontWeight="SemiBold" 
+                    Padding="12,5" 
+                    Cursor="Hand"
+                    BorderThickness="0"/>
+                </Grid>
+            </StackPanel>
+
+            <!-- Borde contenedor con esquinas redondeadas para enmarcar la tabla -->
+            <Border Grid.Row="1" 
+                Background="White" 
+                CornerRadius="8" 
+                BorderBrush="#E2E8F0" 
+                BorderThickness="1">
+
+                <!-- Tabla de datos vinculada a la colección de servicios -->
+                <DataGrid ItemsSource="{Binding VistaHistorialResguardos}" 
+                      AutoGenerateColumns="False" 
+                      CanUserAddRows="False" 
+                      HeadersVisibility="Column"
+                      GridLinesVisibility="Horizontal"
+                      HorizontalGridLinesBrush="#F1F5F9"
+                      Background="Transparent"
+                      BorderThickness="0"
+                      VirtualizingPanel.ScrollUnit="Pixel"
+                      AlternatingRowBackground="#F8FAFC">
+
+                    <DataGrid.Columns>
+
+                        <!-- Columna para mostrar el identificador del servicio -->
+                        <DataGridTextColumn Header="ID RESGUARDO" 
+                                        Binding="{Binding IdResguardo}" 
+                                        Width="100"/>
+
+                        <!-- Columna para mostrar el número económico asociado -->
+                        <DataGridTextColumn Header="ECONOMICO" 
+                                        Binding="{Binding IdEconomico}" 
+                                        Width="120" 
+                                        IsReadOnly="True"/>
+                        <DataGridTextColumn Header="OPERADOR" 
+                            Binding="{Binding IdOperadorNavigation.NombreEmpleado}" 
+                            Width="120" 
+                            IsReadOnly="True"/>
+
+                        <!-- Columna con la fecha formateada en Día/Mes/Año -->
+                        <DataGridTextColumn Header="FECHA DE Resguardo" 
+                                        Binding="{Binding FechaResguardo, StringFormat=\{0:dd/MM/yyyy\}}" 
+                                        Width="160" 
+                                        IsReadOnly="True"/>
+
+                        <!-- Columna multilínea para observaciones del servicio -->
+                        <DataGridTextColumn Header="ANOTACIONES" 
+                                        Binding="{Binding Observaciones}" 
+                                        Width="250" 
+                                        ElementStyle="{StaticResource WrappedTextBlockStyle}"
+                                        IsReadOnly="True"/>
+
+                        <!-- Columna personalizada para la lista de archivos adjuntos -->
+                        <DataGridTemplateColumn Header="ARCHIVOS ADJUNTOS" Width="220">
+                            <DataGridTemplateColumn.CellTemplate>
+                                <DataTemplate>
+                                    <Grid Margin="0">
+                                        <!-- Control que itera y dibuja la lista de archivos adjuntos -->
+                                        <ItemsControl ItemsSource="{Binding ResguardosArchivos}">
+                                            <ItemsControl.ItemTemplate>
+                                                <DataTemplate>
+                                                    <TextBlock Margin="0,2" TextWrapping="Wrap">
+                                                    <!-- Enlace clickeable para abrir/descargar el archivo individual -->
+                                                    <Hyperlink Command="{Binding DataContext.VerArchivoCommand, RelativeSource={RelativeSource AncestorType=DataGrid}}" 
+                                                               CommandParameter="{Binding IdArchivoNavigation}">
+                                                        <Run Text="{Binding IdArchivoNavigation.NombreArchivo}" />
+                                                    </Hyperlink>
+                                                    </TextBlock>
+                                                </DataTemplate>
+                                            </ItemsControl.ItemTemplate>
+                                        </ItemsControl>
+
+                                        <!-- Texto alternativo cuando el servicio no tiene archivos adjuntos -->
+                                        <TextBlock Text="Sin archivos" 
+                                               Foreground="#94A3B8" 
+                                               FontStyle="Italic" 
+                                               FontSize="11"
+                                               VerticalAlignment="Center">
+                                            <TextBlock.Style>
+                                                <Style TargetType="TextBlock">
+                                                    <Setter Property="Visibility" Value="Collapsed"/>
+                                                    <Style.Triggers>
+                                                        <!-- Se hace visible si la lista está vacía -->
+                                                        <DataTrigger Binding="{Binding ResguardosArchivos.Count}" Value="0">
+                                                            <Setter Property="Visibility" Value="Visible"/>
+                                                        </DataTrigger>
+                                                        <!-- Se hace visible si la propiedad es nula -->
+                                                        <DataTrigger Binding="{Binding ResguardosArchivos}" Value="{x:Null}">
+                                                            <Setter Property="Visibility" Value="Visible"/>
+                                                        </DataTrigger>
+                                                    </Style.Triggers>
+                                                </Style>
+                                            </TextBlock.Style>
+                                        </TextBlock>
+                                    </Grid>
+                                </DataTemplate>
+                            </DataGridTemplateColumn.CellTemplate>
+                        </DataGridTemplateColumn>
+
+                    </DataGrid.Columns>
+                </DataGrid>
+            </Border>
+        </Grid>
+    </Grid>
+</UserControl>

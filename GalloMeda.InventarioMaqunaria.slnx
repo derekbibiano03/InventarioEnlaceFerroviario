@@ -1,0 +1,8 @@
+<Solution>
+  <Folder Name="/Elementos de la solución/">
+    <File Path="update.xml" />
+  </Folder>
+  <Project Path="GalloMeda.InventarioMaqunaria/Inventario.Desktop.csproj" />
+  <Project Path="Inventario.Core/Inventario.Core.csproj" />
+  <Project Path="Inventario.Data/Inventario.Data.csproj" Id="90003216-693a-4d0d-b3bb-3e06264bfd73" />
+</Solution>

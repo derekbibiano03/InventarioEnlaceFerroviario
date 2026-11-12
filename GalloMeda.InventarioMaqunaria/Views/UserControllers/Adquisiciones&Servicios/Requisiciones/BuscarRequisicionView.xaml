@@ -1,0 +1,370 @@
+﻿<UserControl x:Class="Inventario.Desktop.Views.UserControllers.Adquisiciones_Servicios.Requisiciones.BuscarRequisicionView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:Inventario.Desktop.Views.UserControllers.Adquisiciones_Servicios.Requisiciones"
+             mc:Ignorable="d" 
+             xmlns:converters="clr-namespace:Inventario.Desktop.Helpers"
+             d:DesignHeight="450" d:DesignWidth="800"
+             x:Name="Root">
+
+    <UserControl.Resources>
+        <converters:RolToVisibilityConverter x:Key="RolToVisibilityConverter"/>
+    </UserControl.Resources>
+    <Grid Margin="10">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+
+        <!-- Barra superior con botón para limpiar filtros -->
+        <StackPanel Grid.Row="0" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,0,0,10">
+            <Button Content="Limpiar Filtros" 
+                    Command="{Binding LimpiarFiltrosCommand}" 
+                    Padding="10,5"/>
+
+            <Button Grid.Column="1" 
+        Content="Exportar a Excel" 
+        Command="{Binding ExportarExcelCommand}" Margin="20,0,0,0"/>
+        </StackPanel>
+
+        <DataGrid Grid.Row="1" Grid.Column="0"
+          ItemsSource="{Binding VistaRequisiciones}" 
+          SelectedItem="{Binding RequisicionSeleccionada, Mode=TwoWay}"
+          AutoGenerateColumns="False" 
+          CanUserAddRows="False" 
+          HeadersVisibility="Column"
+          GridLinesVisibility="Horizontal"
+          Background="White"
+          BorderBrush="#CCCCCC"
+          BorderThickness="1"
+          RowHeight="30"
+          AlternatingRowBackground="#F9F9F9">
+
+            <DataGrid.CellStyle>
+                <Style TargetType="DataGridCell">
+                    <Style.Triggers>
+
+                        <DataTrigger Binding="{Binding GradoPrioridad}" Value="URGENTE">
+                            <Setter Property="Background" Value="#BA0000"/>
+                            <Setter Property="Foreground" Value="#000000"/>
+                        </DataTrigger>
+
+                        <MultiDataTrigger>
+                            <MultiDataTrigger.Conditions>
+                                <Condition Binding="{Binding GradoPrioridad}" Value="ORDINARIO"/>
+                                <Condition Binding="{Binding Estatus}" Value="EN ESPERA DE SER ATENDIDA"/>
+                            </MultiDataTrigger.Conditions>
+                            <Setter Property="Background" Value="#FBFD3D"/>
+                            <Setter Property="Foreground" Value="#000000"/>
+                        </MultiDataTrigger>
+
+                        <DataTrigger Binding="{Binding Estatus}" Value="LIQUIDADA">
+                            <Setter Property="Background" Value="#12A81C"/>
+                            <Setter Property="Foreground" Value="#000000"/>
+                        </DataTrigger>
+
+                        <DataTrigger Binding="{Binding Estatus}" Value="EN ESPERA DE SER AUTORIZADA">
+                            <Setter Property="Background" Value="#D9A0FF"/>
+                            <Setter Property="Foreground" Value="#000000"/>
+                        </DataTrigger>
+
+                    </Style.Triggers>
+                </Style>
+            </DataGrid.CellStyle>
+
+            <DataGrid.Columns>
+                <!-- 1. No. Requisicion -->
+                <DataGridTemplateColumn Width="Auto">
+                    <DataGridTemplateColumn.Header>
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock Text="No. Requisicion" VerticalAlignment="Center" Margin="0,0,5,0"/>
+                            <Menu Background="Transparent">
+                                <MenuItem Header="▼">
+                                    <StackPanel Width="180" Margin="5">
+                                        <TextBox Text="{Binding DataContext.BusquedaIdReq, RelativeSource={RelativeSource AncestorType={x:Type local:BuscarRequisicionView}}, UpdateSourceTrigger=PropertyChanged}" 
+                                         ToolTip="Buscar..." Margin="0,0,0,5"/>
+                                        <ItemsControl ItemsSource="{Binding DataContext.FiltroIdReqOpciones, RelativeSource={RelativeSource AncestorType={x:Type local:BuscarRequisicionView}}}" MaxHeight="150">
+                                            <ItemsControl.ItemTemplate>
+                                                <DataTemplate>
+                                                    <CheckBox Content="{Binding Nombre}" IsChecked="{Binding IsChecked, Mode=TwoWay}" Margin="2"/>
+                                                </DataTemplate>
+                                            </ItemsControl.ItemTemplate>
+                                        </ItemsControl>
+                                    </StackPanel>
+                                </MenuItem>
+                            </Menu>
+                        </StackPanel>
+                    </DataGridTemplateColumn.Header>
+                    <DataGridTemplateColumn.CellTemplate>
+                        <DataTemplate>
+                            <TextBlock Text="{Binding IdRequisicion}" VerticalAlignment="Center" Margin="5,0"/>
+                        </DataTemplate>
+                    </DataGridTemplateColumn.CellTemplate>
+                </DataGridTemplateColumn>
+
+                <!-- 2. Fecha Requisicion -->
+                <DataGridTemplateColumn Width="Auto">
+                    <DataGridTemplateColumn.Header>
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock Text="Fecha Requisicion" VerticalAlignment="Center" Margin="0,0,5,0"/>
+                            <Menu Background="Transparent">
+                                <MenuItem Header="▼">
+                                    <StackPanel Width="180" Margin="5">
+                                        <TextBox Text="{Binding DataContext.BusquedaFecha, RelativeSource={RelativeSource AncestorType={x:Type local:BuscarRequisicionView}}, UpdateSourceTrigger=PropertyChanged}" 
+                                         ToolTip="Buscar..." Margin="0,0,0,5"/>
+                                        <ItemsControl ItemsSource="{Binding DataContext.FiltroFechaOpciones, RelativeSource={RelativeSource AncestorType={x:Type local:BuscarRequisicionView}}}" MaxHeight="150">
+                                            <ItemsControl.ItemTemplate>
+                                                <DataTemplate>
+                                                    <CheckBox Content="{Binding Nombre}" IsChecked="{Binding IsChecked, Mode=TwoWay}" Margin="2"/>
+                                                </DataTemplate>
+                                            </ItemsControl.ItemTemplate>
+                                        </ItemsControl>
+                                    </StackPanel>
+                                </MenuItem>
+                            </Menu>
+                        </StackPanel>
+                    </DataGridTemplateColumn.Header>
+                    <DataGridTemplateColumn.CellTemplate>
+                        <DataTemplate>
+                            <TextBlock Text="{Binding FechaTexto}" VerticalAlignment="Center" Margin="5,0"/>
+                        </DataTemplate>
+                    </DataGridTemplateColumn.CellTemplate>
+                </DataGridTemplateColumn>
+
+                <!-- 3. Empresa -->
+                <DataGridTemplateColumn Width="Auto">
+                    <DataGridTemplateColumn.Header>
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock Text="Empresa" VerticalAlignment="Center" Margin="0,0,5,0"/>
+                            <Menu Background="Transparent">
+                                <MenuItem Header="▼">
+                                    <StackPanel Width="180" Margin="5">
+                                        <TextBox Text="{Binding DataContext.BusquedaEmpresa, RelativeSource={RelativeSource AncestorType={x:Type local:BuscarRequisicionView}}, UpdateSourceTrigger=PropertyChanged}" 
+                                         ToolTip="Buscar..." Margin="0,0,0,5"/>
+                                        <ItemsControl ItemsSource="{Binding DataContext.FiltroEmpresaOpciones, RelativeSource={RelativeSource AncestorType={x:Type local:BuscarRequisicionView}}}" MaxHeight="150">
+                                            <ItemsControl.ItemTemplate>
+                                                <DataTemplate>
+                                                    <CheckBox Content="{Binding Nombre}" IsChecked="{Binding IsChecked, Mode=TwoWay}" Margin="2"/>
+                                                </DataTemplate>
+                                            </ItemsControl.ItemTemplate>
+                                        </ItemsControl>
+                                    </StackPanel>
+                                </MenuItem>
+                            </Menu>
+                        </StackPanel>
+                    </DataGridTemplateColumn.Header>
+                    <DataGridTemplateColumn.CellTemplate>
+                        <DataTemplate>
+                            <TextBlock Text="{Binding Empresa}" VerticalAlignment="Center" Margin="5,0"/>
+                        </DataTemplate>
+                    </DataGridTemplateColumn.CellTemplate>
+                </DataGridTemplateColumn>
+
+                <!-- 4. Estatus -->
+                <DataGridTemplateColumn Width="Auto">
+                    <DataGridTemplateColumn.Header>
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock Text="Estatus" VerticalAlignment="Center" Margin="0,0,5,0"/>
+                            <Menu Background="Transparent">
+                                <MenuItem Header="▼">
+                                    <StackPanel Width="180" Margin="5">
+                                        <TextBox Text="{Binding DataContext.BusquedaEstatus, RelativeSource={RelativeSource AncestorType={x:Type local:BuscarRequisicionView}}, UpdateSourceTrigger=PropertyChanged}" 
+                                         ToolTip="Buscar..." Margin="0,0,0,5"/>
+                                        <ItemsControl ItemsSource="{Binding DataContext.FiltroEstatusOpciones, RelativeSource={RelativeSource AncestorType={x:Type local:BuscarRequisicionView}}}" MaxHeight="150">
+                                            <ItemsControl.ItemTemplate>
+                                                <DataTemplate>
+                                                    <CheckBox Content="{Binding Nombre}" IsChecked="{Binding IsChecked, Mode=TwoWay}" Margin="2"/>
+                                                </DataTemplate>
+                                            </ItemsControl.ItemTemplate>
+                                        </ItemsControl>
+                                    </StackPanel>
+                                </MenuItem>
+                            </Menu>
+                        </StackPanel>
+                    </DataGridTemplateColumn.Header>
+                    <DataGridTemplateColumn.CellTemplate>
+                        <DataTemplate>
+                            <TextBlock Text="{Binding Estatus}" VerticalAlignment="Center" Margin="5,0"/>
+                        </DataTemplate>
+                    </DataGridTemplateColumn.CellTemplate>
+                </DataGridTemplateColumn>
+
+                <!-- 5. Solicitante Visibility="{Binding IdRolUsuario, RelativeSource={RelativeSource AncestorType=Window}, Converter={StaticResource RolToVisibilityConverter}, ConverterParameter=1-2-4}" -->
+                <DataGridTemplateColumn Width="Auto">
+                    <DataGridTemplateColumn.Header>
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock Text="Solicitante" VerticalAlignment="Center" Margin="0,0,5,0"/>
+                            <Menu Background="Transparent">
+                                <MenuItem Header="▼">
+                                    <StackPanel Width="180" Margin="5">
+                                        <TextBox Text="{Binding DataContext.BusquedaSolicitante, RelativeSource={RelativeSource AncestorType={x:Type local:BuscarRequisicionView}}, UpdateSourceTrigger=PropertyChanged}" 
+                                         ToolTip="Buscar..." Margin="0,0,0,5"/>
+                                        <ItemsControl ItemsSource="{Binding DataContext.FiltroSolicitanteOpciones, RelativeSource={RelativeSource AncestorType={x:Type local:BuscarRequisicionView}}}" MaxHeight="150">
+                                            <ItemsControl.ItemTemplate>
+                                                <DataTemplate>
+                                                    <CheckBox Content="{Binding Nombre}" IsChecked="{Binding IsChecked, Mode=TwoWay}" Margin="2"/>
+                                                </DataTemplate>
+                                            </ItemsControl.ItemTemplate>
+                                        </ItemsControl>
+                                    </StackPanel>
+                                </MenuItem>
+                            </Menu>
+                        </StackPanel>
+                    </DataGridTemplateColumn.Header>
+                    <DataGridTemplateColumn.CellTemplate>
+                        <DataTemplate>
+                            <TextBlock Text="{Binding Solicitante}" VerticalAlignment="Center" Margin="5,0"/>
+                        </DataTemplate>
+                    </DataGridTemplateColumn.CellTemplate>
+                </DataGridTemplateColumn>
+
+                <DataGridTemplateColumn Width="Auto">
+                    <DataGridTemplateColumn.Header>
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock Text="Ubicacion" VerticalAlignment="Center" Margin="0,0,5,0"/>
+                            <Menu Background="Transparent">
+                                <MenuItem Header="▼">
+                                    <StackPanel Width="180" Margin="5">
+                                        <TextBox Text="{Binding DataContext.BusquedaUbicacion, RelativeSource={RelativeSource AncestorType={x:Type local:BuscarRequisicionView}}, UpdateSourceTrigger=PropertyChanged}" 
+                         ToolTip="Buscar..." Margin="0,0,0,5"/>
+                                        <ItemsControl ItemsSource="{Binding DataContext.FiltroUbicacionOpciones, RelativeSource={RelativeSource AncestorType={x:Type local:BuscarRequisicionView}}}" MaxHeight="150">
+                                            <ItemsControl.ItemTemplate>
+                                                <DataTemplate>
+                                                    <CheckBox Content="{Binding Nombre}" IsChecked="{Binding IsChecked, Mode=TwoWay}" Margin="2"/>
+                                                </DataTemplate>
+                                            </ItemsControl.ItemTemplate>
+                                        </ItemsControl>
+                                    </StackPanel>
+                                </MenuItem>
+                            </Menu>
+                        </StackPanel>
+                    </DataGridTemplateColumn.Header>
+                    <DataGridTemplateColumn.CellTemplate>
+                        <DataTemplate>
+                            <TextBlock Text="{Binding Ubicacion}" VerticalAlignment="Center" Margin="5,0"/>
+                        </DataTemplate>
+                    </DataGridTemplateColumn.CellTemplate>
+                </DataGridTemplateColumn>
+
+                <DataGridTemplateColumn Width="Auto">
+                    <DataGridTemplateColumn.Header>
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock Text="Economicos" VerticalAlignment="Center" Margin="0,0,5,0"/>
+                            <Menu Background="Transparent">
+                                <MenuItem Header="▼">
+                                    <StackPanel Width="180" Margin="5">
+                                        <TextBox Text="{Binding DataContext.BusquedaIdEconomico, RelativeSource={RelativeSource AncestorType={x:Type local:BuscarRequisicionView}}, UpdateSourceTrigger=PropertyChanged}" 
+ToolTip="Buscar..." Margin="0,0,0,5"/>
+                                        <ItemsControl ItemsSource="{Binding DataContext.FiltroIdEconomicoOpciones, RelativeSource={RelativeSource AncestorType={x:Type local:BuscarRequisicionView}}}" MaxHeight="150">
+                                            <ItemsControl.ItemTemplate>
+                                                <DataTemplate>
+                                                    <CheckBox Content="{Binding Nombre}" IsChecked="{Binding IsChecked, Mode=TwoWay}" Margin="2"/>
+                                                </DataTemplate>
+                                            </ItemsControl.ItemTemplate>
+                                        </ItemsControl>
+                                    </StackPanel>
+                                </MenuItem>
+                            </Menu>
+                        </StackPanel>
+                    </DataGridTemplateColumn.Header>
+                    <DataGridTemplateColumn.CellTemplate>
+                        <DataTemplate>
+                            <TextBlock Text="{Binding IdEconomico}" VerticalAlignment="Center" Margin="5,0"/>
+                        </DataTemplate>
+                    </DataGridTemplateColumn.CellTemplate>
+                </DataGridTemplateColumn>
+
+                <DataGridTemplateColumn Width="Auto">
+                    <DataGridTemplateColumn.Header>
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock Text="Atencion A:" VerticalAlignment="Center" Margin="0,0,5,0"/>
+                            <Menu Background="Transparent">
+                                <MenuItem Header="▼">
+                                    <StackPanel Width="180" Margin="5">
+                                        <TextBox Text="{Binding DataContext.BusquedaAtencion, RelativeSource={RelativeSource AncestorType={x:Type local:BuscarRequisicionView}}, UpdateSourceTrigger=PropertyChanged}" 
+ToolTip="Buscar..." Margin="0,0,0,5"/>
+                                        <ItemsControl ItemsSource="{Binding DataContext.FiltroAtencionOpciones, RelativeSource={RelativeSource AncestorType={x:Type local:BuscarRequisicionView}}}" MaxHeight="150">
+                                            <ItemsControl.ItemTemplate>
+                                                <DataTemplate>
+                                                    <CheckBox Content="{Binding Nombre}" IsChecked="{Binding IsChecked, Mode=TwoWay}" Margin="2"/>
+                                                </DataTemplate>
+                                            </ItemsControl.ItemTemplate>
+                                        </ItemsControl>
+                                    </StackPanel>
+                                </MenuItem>
+                            </Menu>
+                        </StackPanel>
+                    </DataGridTemplateColumn.Header>
+                    <DataGridTemplateColumn.CellTemplate>
+                        <DataTemplate>
+                            <TextBlock Text="{Binding Atencion}" VerticalAlignment="Center" Margin="5,0"/>
+                        </DataTemplate>
+                    </DataGridTemplateColumn.CellTemplate>
+                </DataGridTemplateColumn>
+
+                <!-- 7. Archivo Req. -->
+                <DataGridTextColumn Header="Archivo Req." Width="Auto" Binding="{Binding ArchivoReq}" IsReadOnly="True"/>
+
+                <!-- 8. Acciones -->
+                <DataGridTemplateColumn Header="Acciones" Width="Auto">
+                    <DataGridTemplateColumn.CellTemplate>
+                        <DataTemplate>
+                            <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                                <Button Content="Ver Excel" 
+                        Command="{Binding DataContext.VerExcelCommand, RelativeSource={RelativeSource AncestorType={x:Type local:BuscarRequisicionView}}}"
+                        Margin="5"/>
+
+                                <Button Content="Liquidar" 
+        Command="{Binding DataContext.GenerarOCCommand, RelativeSource={RelativeSource AncestorType={x:Type local:BuscarRequisicionView}}}"
+        Margin="5">
+                                    <Button.Style>
+                                        <Style TargetType="Button">
+                                            <Setter Property="Visibility" Value="Collapsed"/>
+                                            <Style.Triggers>
+                                                <MultiDataTrigger>
+                                                    <MultiDataTrigger.Conditions>
+                                                        <!-- 1. El estatus debe ser el correcto -->
+                                                        <Condition Binding="{Binding Estatus}" Value="EN ESPERA DE SER ATENDIDA"/>
+
+                                                        <!-- 2. El rol del usuario pasa por tu RolToVisibilityConverter -->
+                                                        <Condition Binding="{Binding IdRolUsuario, RelativeSource={RelativeSource AncestorType=Window}, Converter={StaticResource RolToVisibilityConverter}, ConverterParameter=1-2-4}" Value="Visible"/>
+                                                    </MultiDataTrigger.Conditions>
+                                                    <Setter Property="Visibility" Value="Visible"/>
+                                                </MultiDataTrigger>
+                                            </Style.Triggers>
+                                        </Style>
+                                    </Button.Style>
+                                </Button>
+
+                                <Button Content="Liquidar en Procesos" 
+        Command="{Binding DataContext.LiquidarProcesoCommand, RelativeSource={RelativeSource AncestorType={x:Type local:BuscarRequisicionView}}}"
+        Margin="5">
+                                    <Button.Style>
+                                        <Style TargetType="Button">
+                                            <Setter Property="Visibility" Value="Collapsed"/>
+                                            <Style.Triggers>
+                                                <MultiDataTrigger>
+                                                    <MultiDataTrigger.Conditions>
+                                                        <!-- 1. Validar el estatus requerido -->
+                                                        <Condition Binding="{Binding Estatus}" Value="EN ESPERA DE SER ATENDIDA"/>
+                                                        <!-- 2. Validar el rol del usuario usando el convertidor -->
+                                                        <Condition Binding="{Binding IdRolUsuario, RelativeSource={RelativeSource AncestorType=Window}, Converter={StaticResource RolToVisibilityConverter}, ConverterParameter=4}" Value="Visible"/>
+                                                    </MultiDataTrigger.Conditions>
+                                                    <Setter Property="Visibility" Value="Visible"/>
+                                                </MultiDataTrigger>
+                                            </Style.Triggers>
+                                        </Style>
+                                    </Button.Style>
+                                </Button>
+                            </StackPanel>
+                        </DataTemplate>
+                    </DataGridTemplateColumn.CellTemplate>
+                </DataGridTemplateColumn>
+
+            </DataGrid.Columns>
+        
+        </DataGrid>
+    </Grid>
+</UserControl>

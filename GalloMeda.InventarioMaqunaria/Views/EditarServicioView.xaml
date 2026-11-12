@@ -1,0 +1,108 @@
+﻿<Window x:Class="Inventario.Desktop.Views.EditarServicioView"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:Inventario.Desktop.Views"
+        mc:Ignorable="d"
+        Title="EditarServicioView" Height="450" Width="800">
+    <!-- Define la clase de la ventana principal -->
+
+    <Grid Margin="20">
+        <Grid.RowDefinitions>
+            <!-- TITULO DE LA VENTANA -->
+            <RowDefinition Height="Auto"/>
+            <!-- FORMULARIO DE EDICION -->
+            <RowDefinition Height="*"/>
+            <!-- BOTONES DE ACCION (GUARDAR / CANCELAR) -->
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+
+        <!-- ENCABEZADO -->
+        <TextBlock Grid.Row="0" 
+                   Text="Modificar Servicio de Mantenimiento" 
+                   FontSize="18" 
+                   FontWeight="Bold" 
+                   Foreground="#0F172A" 
+                   Margin="0,0,0,15"/>
+
+        <!-- CUERPO DEL FORMULARIO -->
+        <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto">
+            <StackPanel>
+
+                <!-- NUMERO ECONOMICO (LECTURA) -->
+                <TextBlock Text="Número Económico:" FontWeight="SemiBold" Foreground="#334155"/>
+                <TextBox Text="{Binding NoEconomico}" IsReadOnly="True" Background="#E2E8F0" Height="30" VerticalContentAlignment="Center" Padding="5,0"/>
+
+                <!-- FECHA DE MANTENIMIENTO -->
+                <TextBlock Text="Fecha de Mantenimiento:" FontWeight="SemiBold" Foreground="#334155" Margin="0,10,0,0"/>
+                <DatePicker SelectedDate="{Binding FechaMantenimiento}" Height="30"/>
+
+                <!-- TIPO DE MANTENIMIENTO -->
+                <TextBlock Text="Tipo de Mantenimiento:" FontWeight="SemiBold" Foreground="#334155" Margin="0,10,0,0"/>
+                <TextBox Text="{Binding TipoMantenimiento, UpdateSourceTrigger=PropertyChanged}" Height="30" VerticalContentAlignment="Center" Padding="5,0"/>
+
+                <!-- HORAS / KILOMETROS REALES -->
+                <TextBlock Text="Odómetro / Horómetro Real:" FontWeight="SemiBold" Foreground="#334155" Margin="0,10,0,0"/>
+                <TextBox Text="{Binding Horaskilometrosreales, UpdateSourceTrigger=PropertyChanged}" Height="30" VerticalContentAlignment="Center" Padding="5,0"/>
+
+                <!-- ANOTACIONES -->
+                <TextBlock Text="Anotaciones / Observaciones:" FontWeight="SemiBold" Foreground="#334155" Margin="0,10,0,0"/>
+                <TextBox Text="{Binding Anotaciones, UpdateSourceTrigger=PropertyChanged}" Height="80" TextWrapping="Wrap" AcceptsReturn="True" VerticalScrollBarVisibility="Auto"/>
+
+                <!-- SECCION DE ARCHIVOS ADJUNTOS EXISTENTES -->
+                <TextBlock Text="Archivos Adjuntos Actuales:" FontWeight="SemiBold" Foreground="#334155" Margin="0,15,0,0"/>
+                <Border BorderBrush="#CBD5E1" BorderThickness="1" CornerRadius="4" Background="White" Padding="8" MinHeight="60">
+                    <ItemsControl ItemsSource="{Binding ArchivosExistentes}">
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate>
+                                <Grid Margin="0,2">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="Auto"/>
+                                    </Grid.ColumnDefinitions>
+                                    <!-- Nombre del archivo existente -->
+                                    <TextBlock Grid.Column="0" Text="{Binding IdArchivoNavigation.NombreArchivo}" VerticalAlignment="Center"/>
+                                    <!-- Botón para marcar archivo a eliminar de la BD -->
+                                    <Button Grid.Column="1" Content="Eliminar" Foreground="White" Background="#EF4444" Padding="8,2" FontSize="11"
+                                            Command="{Binding DataContext.EliminarArchivoExistenteCommand, RelativeSource={RelativeSource AncestorType=ItemsControl}}"
+                                            CommandParameter="{Binding}"/>
+                                </Grid>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+                </Border>
+
+                <!-- SECCION PARA AGREGAR NUEVOS ARCHIVOS -->
+                <TextBlock Text="Agregar Nuevos Archivos:" FontWeight="SemiBold" Foreground="#334155" Margin="0,15,0,0"/>
+                <Button Content="Seleccionar Nuevos Archivos" Command="{Binding SeleccionarArchivosCommand}" Background="#0EA5E9" Foreground="White" Height="30" FontWeight="SemiBold"/>
+
+                <ItemsControl ItemsSource="{Binding NuevosArchivosSeleccionados}">
+                    <ItemsControl.ItemTemplate>
+                        <DataTemplate>
+                            <Grid Margin="0,2">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                </Grid.ColumnDefinitions>
+                                <TextBlock Grid.Column="0" Text="{Binding}" VerticalAlignment="Center" TextTrimming="CharacterEllipsis"/>
+                                <Button Grid.Column="1" Content="X" Foreground="White" Background="#64748B" Padding="6,1" Margin="5,0,0,0"
+                                        Command="{Binding DataContext.QuitarNuevoArchivoCommand, RelativeSource={RelativeSource AncestorType=ItemsControl}}"
+                                        CommandParameter="{Binding}"/>
+                            </Grid>
+                        </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                </ItemsControl>
+
+            </StackPanel>
+        </ScrollViewer>
+
+        <!-- PIE DE VENTANA: ACCIONES DE GUARDADO -->
+        <StackPanel Grid.Row="2" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,15,0,0">
+            <!-- Botón Cancelar -->
+            <Button Content="Cancelar" IsCancel="True" Width="100" Height="35" Margin="0,0,10,0" Background="#94A3B8" Foreground="White" FontWeight="SemiBold"/>
+            <!-- Botón Guardar Cambios -->
+            <Button Content="Guardar" Command="{Binding GuardarCambiosCommand}" Width="120" Height="35" Background="#16A34A" Foreground="White" FontWeight="Bold"/>
+        </StackPanel>
+    </Grid>
+</Window>

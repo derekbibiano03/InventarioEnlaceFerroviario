@@ -1,0 +1,179 @@
+﻿<Window x:Class="Inventario.Desktop.Views.DetallesWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:Inventario.Desktop.Views"
+        xmlns:helpers="clr-namespace:Inventario.Desktop.Helpers"
+        mc:Ignorable="d"
+        Icon="/Resources/icono.ico"
+        WindowStartupLocation="CenterScreen"
+        Title="DetallesView" Height="760" 
+        Width="1050">
+
+    <Window.Resources>
+        <helpers:UnidadesHorometroConverter x:Key="UnidadesHorometroConverter"/>
+    </Window.Resources>
+
+    <Grid Margin="20">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+
+        <Border Grid.Row="0" Background="#2196F3" CornerRadius="5" Padding="15" Margin="0,0,0,15">
+            <StackPanel >
+                <TextBlock Text="Económico: " FontSize="35" FontWeight="Bold" Foreground="White"/>
+                <TextBlock Text="{Binding Detalle.IdEconomico}" FontSize="30" FontWeight="Bold" Foreground="White"/>
+            </StackPanel>
+        </Border>
+
+        <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto">
+            <StackPanel>
+
+                <TextBlock Text="Datos Generales" FontSize="25" FontWeight="Bold" Foreground="#333333" Margin="0,5,0,5"/>
+                <Border Background="White" BorderBrush="#E0E0E0" BorderThickness="1" CornerRadius="4" Padding="10" Margin="0,0,0,15">
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="200"/>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="120"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                        </Grid.RowDefinitions>
+                        <!---->
+                        <TextBlock Grid.Row="0" Grid.Column="0" Text="Descripción:" FontWeight="SemiBold" Margin="0,4"/>
+                        <TextBlock Grid.Row="0" Grid.Column="1" HorizontalAlignment="Left" Text="{Binding Detalle.Descripcion}" TextWrapping="Wrap" Margin="0,4" />
+
+                        <TextBlock Grid.Row="1" Grid.Column="0" Text="Marca:" FontWeight="SemiBold" Margin="0,4" />
+                        <TextBlock Grid.Row="1" Grid.Column="1" HorizontalAlignment="Left" Text="{Binding Detalle.IdMarcaNavigation.NombreMarca}" TextWrapping="Wrap" Margin="0,4" />
+
+                        <TextBlock Grid.Row="2" Grid.Column="0" Text="Modelo:" FontWeight="SemiBold" Margin="0,4" />
+                        <TextBlock Grid.Row="2" Grid.Column="1" HorizontalAlignment="Left" Text="{Binding Detalle.Modelo}" TextWrapping="Wrap" Margin="0,4" />
+
+                        <TextBlock Grid.Row="0" Grid.Column="2" Text="No. de Serie:" FontWeight="SemiBold" Margin="0,4"/>
+                        <TextBlock Grid.Row="0" Grid.Column="3" HorizontalAlignment="Left" Text="{Binding Detalle.Serie}" Margin="0,4"/>
+
+                        <TextBlock Grid.Row="1" Grid.Column="2" Text="Año Fabricación:" FontWeight="SemiBold" Margin="0,4"/>
+                        <TextBlock Grid.Row="1" Grid.Column="3" HorizontalAlignment="Left" Text="{Binding Detalle.PeriodoFabricacion}" Margin="0,4"/>
+
+                        <TextBlock Grid.Row="2" Grid.Column="2" Text="Horometro:" FontWeight="SemiBold" Margin="0,4"/>
+                        <TextBlock Grid.Row="2" Grid.Column="3" HorizontalAlignment="Left" Text="{Binding Detalle, Converter={StaticResource UnidadesHorometroConverter}}" Margin="0,4"/>
+                        
+                        <TextBlock Grid.Row="3" Grid.Column="2" Text="Placas:" FontWeight="SemiBold" Margin="0,4"/>
+                        <TextBlock Grid.Row="3" Grid.Column="3" HorizontalAlignment="Left" Text="{Binding Detalle.Placas}" Margin="0,4"/>
+                    </Grid>
+                </Border>
+
+                <TextBlock Text="Especificaciones del Motor" FontSize="14" FontWeight="Bold" Foreground="#333333" Margin="0,5,0,5"/>
+                <Border Background="White" BorderBrush="#E0E0E0" BorderThickness="1" CornerRadius="4" Padding="10" Margin="0,0,0,15">
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="200"/>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="120"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                        </Grid.RowDefinitions>
+
+                        <TextBlock Grid.Row="0" Grid.Column="0" Text="Marca Motor:" FontWeight="SemiBold" Margin="0,4"/>
+                        <TextBlock Grid.Row="0" Grid.Column="1" HorizontalAlignment="Left" Text="{Binding Detalle.MarcaMotorNavigation.NombreMarca}" />
+
+                        <TextBlock Grid.Row="1" Grid.Column="0" Text="Modelo Motor:" FontWeight="SemiBold" Margin="0,4"/>
+                        <TextBlock Grid.Row="1" Grid.Column="1" HorizontalAlignment="Left" Text="{Binding Detalle.ModeloMotor}" Margin="0,4"/>
+
+                        <TextBlock Grid.Row="0" Grid.Column="2" Text="Serie Motor:" FontWeight="SemiBold" Margin="0,4"/>
+                        <TextBlock Grid.Row="0" Grid.Column="3" HorizontalAlignment="Left" Text="{Binding Detalle.SerieMotor}" Margin="0,4"/>
+
+                        <TextBlock Grid.Row="1" Grid.Column="2" Text="Familia Motor:" FontWeight="SemiBold" Margin="0,4"/>
+                        <TextBlock Grid.Row="1" Grid.Column="3" HorizontalAlignment="Left" Text="{Binding Detalle.FamiliaMotor}" Margin="0,4"/>
+                        
+                        <TextBlock Grid.Row="2" Grid.Column="2" Text="Combustible:" FontWeight="SemiBold" Margin="0,4"/>
+                        <TextBlock Grid.Row="2" Grid.Column="3" HorizontalAlignment="Left" Text="{Binding Detalle.IdCombustibleNavigation.DescripcionCombustible}" Margin="0,4"/>
+                    </Grid>
+                </Border>
+
+                <TextBlock Text="Asignación y Estatus" FontSize="14" FontWeight="Bold" Foreground="#333333" Margin="0,5,0,5"/>
+                <Border Background="White" BorderBrush="#E0E0E0" BorderThickness="1" CornerRadius="4" Padding="10" Margin="0,0,0,15">
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="200"/>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="120"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                        </Grid.RowDefinitions>
+
+                        <TextBlock Grid.Row="0" Grid.Column="0" Text="Estatus Actual:" FontWeight="SemiBold" Margin="0,4"/>
+                        <TextBlock Grid.Row="0" Grid.Column="1" HorizontalAlignment="Left" Text="{Binding Detalle.IdEstatusNavigation.DescripcionEstatus}" FontWeight="Bold" Foreground="DarkBlue" Margin="0,4"/>
+
+                        <TextBlock Grid.Row="1" Grid.Column="0" Text="Grupo / Familia:" FontWeight="SemiBold" Margin="0,4"/>
+                        <TextBlock Grid.Row="1" Grid.Column="1" HorizontalAlignment="Left" Text="{Binding Detalle.IdGrupoNavigation.DescripcionGrupo}" Margin="0,4"/>
+
+                        <TextBlock Grid.Row="2" Grid.Column="0" Text="Tipo de Equipo:" FontWeight="SemiBold" Margin="0,4"/>
+                        <TextBlock Grid.Row="2" Grid.Column="1" HorizontalAlignment="Left" Text="{Binding Detalle.IdTipoEquipoNavigation.DescripcionTipoEquipo}" Margin="0,4"/>
+
+                        <TextBlock Grid.Row="0" Grid.Column="2" Text="Operador Asignado:" FontWeight="SemiBold" Margin="0,4"/>
+                        <TextBlock Grid.Row="0" Grid.Column="3" HorizontalAlignment="Left" Text="{Binding Detalle.IdOperadorNavigation.NombreEmpleado}" Margin="0,4"/>
+
+                        <TextBlock Grid.Row="1" Grid.Column="2" Text="Responsable:" FontWeight="SemiBold" Margin="0,4"/>
+                        <TextBlock Grid.Row="1" Grid.Column="3" HorizontalAlignment="Left" Text="{Binding Detalle.IdResponsableNavigation.NombreEmpleado}" Margin="0,4"/>
+
+                        <TextBlock Grid.Row="2" Grid.Column="2" Text="Ubicacion:" FontWeight="SemiBold" Margin="0,4"/>
+                        <TextBlock Grid.Row="2" Grid.Column="3" HorizontalAlignment="Left" Text="{Binding Detalle.IdUbicacionNavigation.NombreProyecto}" Margin="0,4"/>
+
+                        <TextBlock Grid.Row="3" Grid.Column="0" Text="Observaciones / Asignaciones:" FontWeight="SemiBold" Margin="0,4"/>
+                        <TextBlock Grid.Row="3" Grid.Column="1" Text="{Binding Detalle.ObservacionesAsignaciones}" Width="500" Margin="10,4" HorizontalAlignment="Left" TextWrapping="Wrap"/>
+
+                        <TextBlock Grid.Row="3" Grid.Column="2" Text="Dimensiones:" FontWeight="SemiBold" Margin="0,4"/>
+                        <TextBlock Grid.Row="3" Grid.Column="3" Text="{Binding Detalle.Dimensiones}" Width="500" Margin="10,4" HorizontalAlignment="Left" TextWrapping="Wrap"/>
+                    </Grid>
+                </Border>
+            </StackPanel>
+        </ScrollViewer>
+
+        <GroupBox Grid.Row="2" Header="Documentos y Archivos Anexados" FontWeight="Bold" Padding="10" Height="150">
+            <ScrollViewer VerticalScrollBarVisibility="Auto">
+                <ListBox ItemsSource="{Binding ArchivosAnexados}" BorderThickness="0" HorizontalContentAlignment="Stretch">
+                    <ListBox.ItemTemplate>
+                        <DataTemplate>
+                            <Grid Margin="2">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                </Grid.ColumnDefinitions>
+
+                                <TextBlock Grid.Column="0" VerticalAlignment="Center">
+                                    <Hyperlink Command="{Binding DataContext.AbrirArchivoCommand, RelativeSource={RelativeSource AncestorType=ListBox}}" 
+                                               CommandParameter="{Binding}">
+                                        <TextBlock Text="{Binding NombreArchivo}" FontSize="13"/>
+                                    </Hyperlink>
+                                </TextBlock>
+
+                                <Button Grid.Column="1" Content="Descargar" Padding="8,3" Margin="5,0,0,0"
+                                        Command="{Binding DataContext.DescargarArchivoCommand, RelativeSource={RelativeSource AncestorType=ListBox}}"
+                                        CommandParameter="{Binding}"/>
+                            </Grid>
+                        </DataTemplate>
+                    </ListBox.ItemTemplate>
+                </ListBox>
+            </ScrollViewer>
+        </GroupBox>
+    </Grid>
+</Window>

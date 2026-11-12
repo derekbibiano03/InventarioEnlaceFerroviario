@@ -1,0 +1,32 @@
+﻿<Window x:Class="Inventario.Desktop.Views.Auth"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:Inventario.Desktop.Views"
+        mc:Ignorable="d"
+        WindowStartupLocation="CenterScreen"
+        Icon="/Resources/icono.ico"
+        Title="Gallo Meda Inicio de Sesion" Height="450" Width="800">
+    <Grid>
+
+        <StackPanel VerticalAlignment="Center" Width="400">
+            <TextBlock Style="{StaticResource TextoGeneral}" Text="INVENTARIO MAQUINARIA GALLO MEDA" FontSize="22" FontWeight="Bold" Margin="0,0,0,20" HorizontalAlignment="Center" Foreground="#1A365D"/>
+
+            <TextBlock Style="{StaticResource TextoGeneral}" Text="Usuario:" FontWeight="SemiBold" Margin="0,0,5,5" Foreground="#4A5568" />
+            <TextBox Text="{Binding Usuario, UpdateSourceTrigger=PropertyChanged}" Margin="0,0,0,15" Height="30" VerticalContentAlignment="Center" Padding="5,0,0,0"/>
+
+            <TextBlock Style="{StaticResource TextoGeneral}" Text="Contraseña:"  FontWeight="SemiBold" Margin="0,0,5,5" Foreground="#4A5568"/>
+            <PasswordBox x:Name="TxtContrasena" Margin="0,0,0,25" Height="30" VerticalContentAlignment="Center" Padding="5,0,0,0"/>
+
+            <Button Content="Iniciar Sesión" Command="{Binding LoginCommand}" CommandParameter="{Binding ElementName=TxtContrasena}" Height="38" Background="#1A365D" Foreground="White" FontWeight="Bold" BorderThickness="0"/>
+            <TextBlock Style="{StaticResource TextoGeneral}" 
+           FontSize="14" 
+           TextWrapping="Wrap" 
+           Text="Cualquier duda sugerencia o problema contactar al correo dbibiano@enlaceferroviario.com (Version 1.11.4)" 
+           Margin="0,0,5,5" 
+           Foreground="#4A5568" />
+        </StackPanel>
+        
+    </Grid>
+</Window>

@@ -1,0 +1,226 @@
+﻿<Window x:Class="Inventario.Desktop.Views.EditarEconomicoWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+        mc:Ignorable="d" 
+        Title="Modificar Registro Económico" 
+        Height="760" 
+        Width="1050"
+        WindowStartupLocation="CenterScreen"
+        ResizeMode="NoResize">
+
+    <Grid Background="#F5F5F5">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+
+        <Border Grid.Row="0" Background="#2196F3" Padding="15">
+            <StackPanel Orientation="Horizontal">
+                <TextBlock Text="Editando Equipo Económico ID: " FontSize="16" FontWeight="Bold" Foreground="White"/>
+                <TextBlock Text="{Binding EconomicoEdicion.IdEconomico}" FontSize="16" FontWeight="Bold" Foreground="Yellow"/>
+            </StackPanel>
+        </Border>
+
+        <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto">
+            <Grid Margin="10">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+
+                <StackPanel Grid.Column="0" Orientation="Vertical" Margin="20,10,10,10">
+                    <TextBlock Text="Tipo de Equipo:" FontWeight="Bold" Margin="0,0,0,5"/>
+                    <ComboBox ItemsSource="{Binding TipoEquipo}"
+                              DisplayMemberPath="DescripcionTipoEquipo"
+                              SelectedValuePath="IdTipoEquipo"
+                              SelectedValue="{Binding EconomicoEdicion.IdTipoEquipo, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" 
+                              Width="250" Height="30" HorizontalAlignment="Left" Margin="0,0,0,15"/>
+
+                    <TextBlock Text="Grupo / Descripción:" FontWeight="Bold" Margin="0,0,0,5" />
+                    <ComboBox ItemsSource="{Binding Grupos}"
+                              DisplayMemberPath="DescripcionGrupo"
+                              SelectedItem="{Binding GrupoSeleccionado, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" 
+                              Width="250" Height="30" HorizontalAlignment="Left" Margin="0,0,0,15"/>
+
+                    <TextBlock Text="Marca:" FontWeight="Bold" Margin="0,0,0,5" />
+                    <ComboBox ItemsSource="{Binding Marcas}"
+                              DisplayMemberPath="NombreMarca"
+                              SelectedValuePath="IdMarca"
+                              SelectedValue="{Binding EconomicoEdicion.IdMarca, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" 
+                              Width="250" Height="30" HorizontalAlignment="Left" Margin="0,0,0,15"/>
+
+                    <TextBlock Text="Modelo:" FontWeight="Bold" Margin="0,0,0,5"/>
+                    <TextBox Text="{Binding EconomicoEdicion.Modelo, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" 
+                             Width="250" Height="30" HorizontalAlignment="Left" Margin="0,0,0,15"/>
+
+                    <TextBlock Text="Número de Serie:" FontWeight="Bold" Margin="0,0,0,5"/>
+                    <TextBox Text="{Binding EconomicoEdicion.Serie, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" 
+                             Width="250" Height="30" HorizontalAlignment="Left" Margin="0,0,0,15"/>
+
+                    <TextBlock Text="Año Modelo:" FontWeight="Bold" Margin="0,0,0,5"/>
+                    <TextBox Text="{Binding EconomicoEdicion.PeriodoFabricacion, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged, TargetNullValue=''}" 
+                             Width="250" Height="30" HorizontalAlignment="Left" Margin="0,0,0,15"/>
+
+                    <TextBlock Text="Tipo de Combustible:" FontWeight="Bold" Margin="0,0,0,5" />
+                    <ComboBox ItemsSource="{Binding Combustibles}"
+                              DisplayMemberPath="DescripcionCombustible"
+                              SelectedValuePath="IdCombustible"
+                              SelectedValue="{Binding EconomicoEdicion.IdCombustible, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" 
+                              Width="250" Height="30" HorizontalAlignment="Left" Margin="0,0,0,15"/>
+
+                    <TextBlock Text="Grado de Propiedad:" FontWeight="Bold" Margin="0,0,0,5"/>
+                    <ComboBox SelectedValue="{Binding EconomicoEdicion.GradoPropiedad, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                          SelectedValuePath="Content"
+                          Width="250" Height="30" HorizontalAlignment="Left" Margin="0,0,0,15">
+                        <ComboBoxItem Content="PROPIO" />
+                        <ComboBoxItem Content="RENTADO" />
+                    </ComboBox>
+
+
+                </StackPanel>
+
+                <StackPanel Grid.Column="1" Orientation="Vertical" Margin="20,10,10,10">
+                    <TextBlock Text="Propietario del Económico:" FontWeight="Bold" Margin="0,0,0,5" />
+                    <ComboBox ItemsSource="{Binding PYA}"
+                              DisplayMemberPath="Nombre"
+                              SelectedValuePath="IdPya"
+                              SelectedValue="{Binding EconomicoEdicion.IdPropietario, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" 
+                              Width="250" Height="30" HorizontalAlignment="Left" Margin="0,0,0,15"/>
+
+                    <TextBlock Text="Administrador del Económico:" FontWeight="Bold" Margin="0,0,0,5" />
+                    <ComboBox ItemsSource="{Binding PYA}"
+                              DisplayMemberPath="Nombre"
+                              SelectedValuePath="IdPya"
+                              SelectedValue="{Binding EconomicoEdicion.IdAdministrador, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" 
+                              Width="250" Height="30" HorizontalAlignment="Left" Margin="0,0,0,15"/>
+
+                    <TextBlock Text="Operador del Económico:" FontWeight="Bold" Margin="0,0,0,5" />
+                    <ComboBox ItemsSource="{Binding Operadores}"
+                          DisplayMemberPath="NombreEmpleado"
+                          SelectedValuePath="NoEmpleado"
+                          SelectedValue="{Binding EconomicoEdicion.IdOperador, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" 
+                          Width="250" Height="30" HorizontalAlignment="Left" Margin="0,0,0,15"/>
+
+                    <TextBlock Text="Responsable del Económico:" FontWeight="Bold" Margin="0,0,0,5" />
+                    <ComboBox ItemsSource="{Binding Encargados}"
+                          DisplayMemberPath="NombreEmpleado"
+                          SelectedValuePath="NoEmpleado"
+                          SelectedValue="{Binding EconomicoEdicion.IdResponsable, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" 
+                          Width="250" Height="30" HorizontalAlignment="Left" Margin="0,0,0,15"/>
+
+                    <TextBlock Text="Ubicación Actual:" FontWeight="Bold" Margin="0,0,0,5"/>
+                    <ComboBox ItemsSource="{Binding Ubicaciones}"
+                              DisplayMemberPath="NombreProyecto"
+                              SelectedValuePath="IdUbicacion"
+                              SelectedValue="{Binding EconomicoEdicion.IdUbicacion, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" 
+                              Width="250" Height="30" HorizontalAlignment="Left" Margin="0,0,0,15"/>
+
+                    <TextBlock Text="Placas de Circulación (Opcional):" FontWeight="Bold" Margin="0,0,0,5"/>
+                    <TextBox Text="{Binding EconomicoEdicion.Placas, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" 
+                             Width="250" Height="30" HorizontalAlignment="Left" Margin="0,0,0,15"/>
+
+                    <TextBlock Text="Horómetro / Kilometraje:" FontWeight="Bold" Margin="0,0,0,5"/>
+                    <TextBox Text="{Binding EconomicoEdicion.Horometro, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" 
+                             Width="250" Height="30" HorizontalAlignment="Left" Margin="0,0,0,15"/>
+
+                    <TextBlock Text="Valor Adquisicion:" FontWeight="Bold" Margin="0,0,0,5"/>
+                    <TextBox Text="{Binding EconomicoEdicion.ValorAdquisicion, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" 
+         Width="250" Height="30" HorizontalAlignment="Left" Margin="0,0,0,15"/>
+                </StackPanel>
+
+                <StackPanel Grid.Column="2" Orientation="Vertical" Margin="20,10,10,10">
+                    <TextBlock Text="Medida en:" FontWeight="Bold" Margin="0,0,0,5"/>
+                    <ComboBox SelectedValue="{Binding EconomicoEdicion.Thk, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                              SelectedValuePath="Content"
+                              Width="250" Height="30" HorizontalAlignment="Left" Margin="0,0,0,15">
+                        <ComboBoxItem Content="KILOMETRAJE" />
+                        <ComboBoxItem Content="HOROMETRO" />
+                        <ComboBoxItem Content="NO APLICA" />
+                    </ComboBox>
+
+                    <TextBlock Text="Marca Motor:" FontWeight="Bold" Margin="0,0,0,5"/>
+                    <ComboBox ItemsSource="{Binding Marcas}"
+                              DisplayMemberPath="NombreMarca" 
+                              SelectedValuePath="IdMarca"
+                              SelectedValue="{Binding EconomicoEdicion.MarcaMotor, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" 
+                              Width="250" Height="30" HorizontalAlignment="Left" Margin="0,0,0,15"/>
+
+                    <TextBlock Text="Modelo de Motor (Opcional):" FontWeight="Bold" Margin="0,0,0,5"/>
+                    <TextBox Text="{Binding EconomicoEdicion.ModeloMotor, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" 
+                             Width="250" Height="30" HorizontalAlignment="Left" Margin="0,0,0,15"/>
+
+                    <TextBlock Text="Número de Serie del Motor (Opcional):" FontWeight="Bold" Margin="0,0,0,5"/>
+                    <TextBox Text="{Binding EconomicoEdicion.SerieMotor, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" 
+                             Width="250" Height="30" HorizontalAlignment="Left" Margin="0,0,0,15"/>
+
+                    <TextBlock Text="Familia de Motor (Opcional):" FontWeight="Bold" Margin="0,0,0,5"/>
+                    <TextBox Text="{Binding EconomicoEdicion.FamiliaMotor, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" 
+                             Width="250" Height="30" HorizontalAlignment="Left" Margin="0,0,0,15"/>
+
+                    <TextBlock Text="Estatus:" FontWeight="Bold" Margin="0,0,0,5"/>
+                    <ComboBox ItemsSource="{Binding Estatus}"
+                              DisplayMemberPath="DescripcionEstatus"
+                              SelectedValuePath="IdEstatus"
+                              SelectedValue="{Binding EconomicoEdicion.IdEstatus, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" 
+                              Width="250" Height="30" HorizontalAlignment="Left" Margin="0,0,0,15"/>
+
+                    <TextBlock Text="Tipo de Seguro:" FontWeight="Bold" Margin="0,0,0,5"/>
+                    <ComboBox SelectedValue="{Binding EconomicoEdicion.TipoSeguro, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                              SelectedValuePath="Content"
+                              Width="250" Height="30" HorizontalAlignment="Left" Margin="0,0,0,15">
+                        <ComboBoxItem Content="SEGURO COMPLETO" />
+                        <ComboBoxItem Content="SEGURO EN ALMACEN" />
+                        <ComboBoxItem Content="SEGURO EN CAMPO" />
+                        <ComboBoxItem Content="SIN SEGURO" />
+                    </ComboBox>
+
+                    <CheckBox Content="¿Tiene seguro este Económico?" 
+                              IsChecked="{Binding EconomicoEdicion.EstatusSeguro, Mode=TwoWay}" 
+                              FontWeight="Bold" Margin="0,5,0,15"/>
+
+                    <CheckBox Content="¿El economico esta verificado?" 
+                              IsChecked="{Binding EconomicoEdicion.Verificado, Mode=TwoWay}" 
+                              FontWeight="Bold" Margin="0,5,0,15"/>
+                </StackPanel>
+            </Grid>
+        </ScrollViewer>
+
+        <Border Grid.Row="2" Background="#E0E0E0" Padding="15" BorderBrush="#BDBDBD" BorderThickness="0,1,0,0">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+
+                <StackPanel Grid.Column="0" Orientation="Vertical" Margin="10,0,20,0">
+                    <TextBlock Text="Observaciones de Asignación:" FontWeight="Bold" Margin="0,0,0,5"/>
+                    <TextBox Text="{Binding EconomicoEdicion.ObservacionesAsignaciones, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" 
+                             Height="60" Width="320" AcceptsReturn="True" TextWrapping="Wrap" VerticalScrollBarVisibility="Auto"/>
+                </StackPanel>
+
+                <StackPanel Grid.Column="1" Orientation="Vertical" Margin="10,0,20,0">
+                    <TextBlock Text="Dimensiones:" FontWeight="Bold" Margin="0,0,0,5"/>
+                    <TextBox Text="{Binding EconomicoEdicion.Dimensiones, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" 
+                             Height="60" Width="320" AcceptsReturn="True" TextWrapping="Wrap" VerticalScrollBarVisibility="Auto"/>
+                </StackPanel>
+
+                <StackPanel Grid.Column="2" Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Bottom" Margin="0,0,10,0">
+                    <Button Command="{Binding GuardarCambiosCommand}" 
+                            Content="Guardar Cambios" 
+                            Background="#4CAF50" Foreground="White" FontWeight="Bold"
+                            Width="140" Height="35" Margin="0,0,10,0"/>
+
+                    <Button Command="{Binding CancelarCommand}" 
+                            Content="Cancelar" 
+                            Background="#F44336" Foreground="White" FontWeight="Bold"
+                            Width="100" Height="35"/>
+                </StackPanel>
+            </Grid>
+        </Border>
+    </Grid>
+</Window>

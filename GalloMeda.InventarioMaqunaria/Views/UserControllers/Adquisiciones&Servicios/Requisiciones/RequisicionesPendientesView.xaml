@@ -1,0 +1,62 @@
+﻿<UserControl x:Class="Inventario.Desktop.Views.UserControllers.Adquisiciones_Servicios.Requisiciones.RequisicionesPendientesView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:Inventario.Desktop.Views.UserControllers.Adquisiciones_Servicios.Requisiciones"
+             x:Name="Root"
+             mc:Ignorable="d" 
+             d:DesignHeight="450" d:DesignWidth="800">
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+
+        <DataGrid Grid.Row="1" Grid.Column="0"
+                  Width="Auto"
+                  ItemsSource="{Binding Requisiciones}" 
+                  SelectedItem="{Binding RequisicionSeleccionada, Mode=TwoWay}"
+                  AutoGenerateColumns="False" 
+                  CanUserAddRows="False" 
+                  HeadersVisibility="Column"
+                  GridLinesVisibility="Horizontal"
+                  Background="White"
+                  BorderBrush="#CCCCCC"
+                  BorderThickness="1"
+                  RowHeight="30"
+                  AlternatingRowBackground="#F9F9F9">
+
+            <DataGrid.Columns>
+                <DataGridTextColumn Header="No. Requisicion" Width="Auto" Binding="{Binding IdRequisicion}" IsReadOnly="True"/>
+                <DataGridTextColumn Header="Fecha Requisicion" Width="*" Binding="{Binding FechaRequisicion}" IsReadOnly="True"/>
+                <DataGridTextColumn Header="Empresa" Width="*" Binding="{Binding Empresa}" IsReadOnly="True"/>
+                <DataGridTextColumn Header="Estatus" Width="*" Binding="{Binding Estatus}" IsReadOnly="True"/>
+                <DataGridTextColumn Header="Solicitante" Width="*" Binding="{Binding Solicitante}" IsReadOnly="True"/>
+                <DataGridTextColumn Header="Economico" Width="*" Binding="{Binding IdEconomico}" IsReadOnly="True"/>
+                <DataGridTextColumn Header="Archivo Req." Width="*" Binding="{Binding ArchivoReq}" IsReadOnly="True"/>
+
+
+                <DataGridTemplateColumn Header="Acciones" Width="*">
+                    <DataGridTemplateColumn.CellTemplate>
+                        <DataTemplate>
+                            <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                                <Button Content="Ver Excel" 
+                        Command="{Binding DataContext.VerExcelCommand, ElementName=Root}"
+                        Margin="2"/>
+                                <Button Content="Autorizar" 
+                        Command="{Binding DataContext.AutorizarCommand, ElementName=Root}"
+                        Margin="2"
+                        Background="#FFD700"/>
+                                <Button Content="No Autorizar" 
+                        Command="{Binding DataContext.NoAutorizarCommand, ElementName=Root}"
+                        Margin="2"
+                        Background="#D60E0E"/>
+                            </StackPanel>
+                        </DataTemplate>
+                    </DataGridTemplateColumn.CellTemplate>
+                </DataGridTemplateColumn>
+            </DataGrid.Columns>
+        </DataGrid>
+    </Grid>
+</UserControl>

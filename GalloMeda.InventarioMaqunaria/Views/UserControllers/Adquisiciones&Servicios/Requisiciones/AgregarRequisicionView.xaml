@@ -1,0 +1,248 @@
+﻿<UserControl x:Class="Inventario.Desktop.Views.UserControllers.Adquisiciones_Servicios.Requisiciones.AgregarRequisicionView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:Inventario.Desktop.Views.UserControllers.Adquisiciones_Servicios.Requisiciones"
+             mc:Ignorable="d" 
+             xmlns:helpers="clr-namespace:Inventario.Desktop.Helpers"
+             xmlns:sys="clr-namespace:System;assembly=mscorlib"
+            d:DesignHeight="550" d:DesignWidth="950">
+    <UserControl.Resources>
+        <helpers:TipoRequisicionToEnabledConverter x:Key="TipoRequisicionConverter"/>
+    </UserControl.Resources>
+    <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
+        <Border Margin="20" Background="White" Padding="20" CornerRadius="5" HorizontalAlignment="Stretch">
+            <StackPanel>
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                    </Grid.RowDefinitions>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="300" />
+                        <ColumnDefinition Width="*" />
+                    </Grid.ColumnDefinitions>
+                    
+
+                    <TextBlock Text="TIPO DE REQUISICION" Grid.Row="2" Grid.Column="0" FontSize="18" FontWeight="Bold" Padding="10,40,30,4" HorizontalAlignment="Left"/>
+                    <ComboBox SelectedValue="{Binding TipoRequiSeleccionada, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                        SelectedValuePath="Content"
+                        Grid.Row="3" Grid.Column="0"
+                        Width="250" Height="30" HorizontalAlignment="Left" Margin="0,10,0,15">
+                        <ComboBoxItem Content="REQUISICION PARA ECONOMICO" />
+                        <ComboBoxItem Content="REQUISICION PARA MATERIALES" />
+                        <ComboBoxItem Content="REQUISICION PARA AGREGAR A STOCK" />
+                        <ComboBoxItem Content="REQUISICION PARA HERRAMIENTAS" />
+                        <ComboBoxItem Content="REQUISICION PARA OTROS" />
+                        
+                    </ComboBox>
+
+                    <TextBlock Text="GRADO DE PRIORIDAD" Grid.Row="2" Grid.Column="1" FontSize="18" FontWeight="Bold" Padding="10,40,30,4" HorizontalAlignment="Left"/>
+                    <ComboBox SelectedValue="{Binding GradoPrioridadSeleccionado, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                        SelectedValuePath="Content"
+                        Grid.Row="3" Grid.Column="1"
+                        Width="250" Height="30" HorizontalAlignment="Left" Margin="0,10,0,15">
+                        <ComboBoxItem Content="ORDINARIO" />
+                        <ComboBoxItem Content="URGENTE" />
+                    </ComboBox>
+
+
+                    <TextBlock Text="REQUISICIÓN DE COMPRA" Grid.Row="0" Grid.Column="1" FontSize="18" FontWeight="Bold" Padding="0,0,30,4" HorizontalAlignment="Right"/>
+                    <StackPanel Orientation="Horizontal" Grid.Row="1" Grid.Column="1" HorizontalAlignment="Right" Margin="0,5,0,4">
+                        <TextBlock Text="{Binding ConsecutivoGenerado}" VerticalAlignment="Center" FontWeight="Bold" FontSize="14" Padding="0,0,0,0"/>
+                    </StackPanel>
+                    <StackPanel Orientation="Horizontal"  Grid.Row="2" Grid.Column="1" HorizontalAlignment="Right" Margin="0,5,0,4">
+                        <ComboBox Width="100" Height="20" HorizontalAlignment="Left" Margin="0,20,20,20"
+Text="{Binding EmpresaSeleccionada, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" >
+                            <ComboBoxItem Content="CGM" />
+                            <ComboBoxItem Content="OX" />
+                        </ComboBox>
+
+                        <ComboBox ItemsSource="{Binding Ubicaciones}"
+                            DisplayMemberPath="NombreProyecto"
+                            SelectedValuePath="Siglas"
+                            SelectedValue="{Binding UbicacionSeleccionada, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" 
+                            Width="100" Height="20" HorizontalAlignment="Left" Padding="0,0,0,0"/>
+                    </StackPanel>
+                </Grid>
+
+                <TextBlock Text="{Binding FechaActual, StringFormat={}{0:dd/MM/yyyy}}" 
+                           FontSize="13" FontWeight="Bold" Margin="0,0,110,4" HorizontalAlignment="Right"/>
+                <GroupBox Header="Información General" FontWeight="Bold" Margin="0,0,0,15">
+                    <Grid Margin="10">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                        </Grid.RowDefinitions>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="140"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+
+                        <!-- Atención A -->
+                        <TextBlock Text="Atención A:" Grid.Row="0" Grid.Column="0" VerticalAlignment="Center"/>
+                        <ComboBox Grid.Row="0" Grid.Column="1"
+                                  ItemsSource="{Binding UsuariosCompras}"
+                                  DisplayMemberPath="NombreCompleto"
+                                  SelectedItem="{Binding UsuarioAtencionSeleccionado, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" 
+                                  Width="250" Height="30" HorizontalAlignment="Left" Margin="0,2"/>
+                    </Grid>
+                </GroupBox>
+
+                <!-- DATOS DEL ACTIVO -->
+                <GroupBox Header="Datos de la Unidad, Máquina o Equipo" FontWeight="Bold" Margin="0,0,0,15"
+          IsEnabled="{Binding TipoRequiSeleccionada, Converter={StaticResource TipoRequisicionConverter}}">
+                    <Grid Margin="10">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                        </Grid.RowDefinitions>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+
+                        <StackPanel Grid.Row="0" Grid.Column="0" Margin="5">
+                            <TextBlock Text="No. Económico:" Margin="0,0,0,3"/>
+                            <Border BorderBrush="#CCCCCC" BorderThickness="1" CornerRadius="4" Background="White" Height="30" Padding="2">
+                                <ComboBox ItemsSource="{Binding Economicos}"
+                                          DisplayMemberPath="IdEconomico"
+                                          SelectedItem="{Binding EconomicoSeleccionado, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                          VerticalContentAlignment="Center" Background="Transparent" BorderThickness="0"/>
+                            </Border>
+                        </StackPanel>
+
+                        <StackPanel Grid.Row="0" Grid.Column="1" Margin="5">
+                            <TextBlock Text="Descripción:" Margin="0,0,0,3"/>
+                            <TextBox Text="{Binding DescripcionUnidad, UpdateSourceTrigger=PropertyChanged}" Padding="3" VerticalContentAlignment="Center"/>
+                        </StackPanel>
+
+                        <StackPanel Grid.Row="0" Grid.Column="2" Margin="5">
+                            <TextBlock Text="Modelo:" Margin="0,0,0,3"/>
+                            <TextBox Text="{Binding ModeloUnidad, UpdateSourceTrigger=PropertyChanged}" Padding="3" VerticalContentAlignment="Center"/>
+                        </StackPanel>
+
+                        <StackPanel Grid.Row="0" Grid.Column="3" Margin="5">
+                            <TextBlock Text="Marca:" Margin="0,0,0,3"/>
+                            <TextBox Text="{Binding MarcaUnidad, UpdateSourceTrigger=PropertyChanged}" Padding="3" VerticalContentAlignment="Center"/>
+                        </StackPanel>
+
+                        <StackPanel Grid.Row="0" Grid.Column="4" Margin="5">
+                            <TextBlock Text="No. Serie:" Margin="0,0,0,3"/>
+                            <TextBox Text="{Binding SerieUnidad, UpdateSourceTrigger=PropertyChanged}" Padding="3" VerticalContentAlignment="Center"/>
+                        </StackPanel>
+
+                        <StackPanel Grid.Row="1" Grid.Column="0" Margin="5">
+                            <TextBlock Text="Tipo de Motor:" Margin="0,0,0,3"/>
+                            <TextBox Text="{Binding MotorUnidad, UpdateSourceTrigger=PropertyChanged}" Padding="3" VerticalContentAlignment="Center"/>
+                        </StackPanel>
+
+                        <StackPanel Grid.Row="1" Grid.Column="1" Margin="5">
+                            <TextBlock Text="Modelo de Motor:" Margin="0,0,0,3"/>
+                            <TextBox Text="{Binding MotorModelo, UpdateSourceTrigger=PropertyChanged}" Padding="3" VerticalContentAlignment="Center"/>
+                        </StackPanel>
+
+                        <StackPanel Grid.Row="1" Grid.Column="2" Margin="5">
+                            <TextBlock Text="Marca de Motor:" Margin="0,0,0,3"/>
+                            <TextBox Text="{Binding MotorMarca, UpdateSourceTrigger=PropertyChanged}" Padding="3" VerticalContentAlignment="Center"/>
+                        </StackPanel>
+
+                        <StackPanel Grid.Row="1" Grid.Column="3" Margin="5">
+                            <TextBlock Text="Serie de Motor:" Margin="0,0,0,3"/>
+                            <TextBox Text="{Binding MotorSerie, UpdateSourceTrigger=PropertyChanged}" Padding="3" VerticalContentAlignment="Center"/>
+                        </StackPanel>
+                    </Grid>
+                </GroupBox>
+
+                <!-- TABLA DE CONCEPTOS -->
+                <GroupBox Header="Conceptos de Orden de Compra" FontWeight="Bold" Margin="0,0,0,15">
+                    <StackPanel Margin="10">
+                        <DataGrid ItemsSource="{Binding Detalles}" AutoGenerateColumns="False" CanUserAddRows="True" Height="200" Margin="0,0,0,10">
+                            <DataGrid.Columns>
+                                <DataGridTemplateColumn Header="ACCIONES" Width="70">
+                                    <DataGridTemplateColumn.CellTemplate>
+                                        <DataTemplate>
+                                            <Button Content="X" Command="{Binding DataContext.EliminarConceptoCommand, RelativeSource={RelativeSource AncestorType=DataGrid}}" CommandParameter="{Binding}" Width="30" Height="20" Background="#FFF2F2" Foreground="Red" FontWeight="Bold"/>
+                                        </DataTemplate>
+                                    </DataGridTemplateColumn.CellTemplate>
+                                </DataGridTemplateColumn>
+
+                                <DataGridTextColumn Header="PART." Binding="{Binding Partida}" Width="50"/>
+                                <DataGridTextColumn Header="CANTIDAD" Binding="{Binding Cantidad, UpdateSourceTrigger=PropertyChanged}" Width="80"/>
+
+                                <DataGridTemplateColumn Header="UNIDAD" Width="100">
+                                    <DataGridTemplateColumn.CellTemplate>
+                                        <DataTemplate>
+                                            <TextBlock Text="{Binding Unidad}" VerticalAlignment="Center" Margin="5,0"/>
+                                        </DataTemplate>
+                                    </DataGridTemplateColumn.CellTemplate>
+                                    <DataGridTemplateColumn.CellEditingTemplate>
+                                        <DataTemplate>
+                                            <ComboBox SelectedItem="{Binding Unidad, UpdateSourceTrigger=PropertyChanged}">
+                                                <sys:String>PZA</sys:String>
+                                                <sys:String>SERV</sys:String>
+                                                <sys:String>KG</sys:String>
+                                                <sys:String>LT</sys:String>
+                                                <sys:String>MT</sys:String>
+                                            </ComboBox>
+                                        </DataTemplate>
+                                    </DataGridTemplateColumn.CellEditingTemplate>
+                                </DataGridTemplateColumn>
+
+                                <DataGridTextColumn Header="DESCRIPCIÓN" Binding="{Binding Descripcion, UpdateSourceTrigger=PropertyChanged}" Width="*"/>
+                                <DataGridTextColumn Header="NO. DE PART." Binding="{Binding NoPartida, UpdateSourceTrigger=PropertyChanged}" Width="90"/>
+                                <DataGridTextColumn Header="NO. EQUIVALENTE" Binding="{Binding NoEquivalente, UpdateSourceTrigger=PropertyChanged}" Width="120"/>
+                                <DataGridTextColumn Header="CONJUNTO" Binding="{Binding Catalogo, UpdateSourceTrigger=PropertyChanged}" Width="80"/>
+                                <DataGridTextColumn Header="SUB. CONJUNTO" Binding="{Binding Pagina, UpdateSourceTrigger=PropertyChanged}" Width="80"/>
+                            </DataGrid.Columns>
+                        </DataGrid>
+                        <Button Content="Añadir Concepto" Command="{Binding AñadirConceptoCommand}" Width="120" Height="30" HorizontalAlignment="Left"/>
+                    </StackPanel>
+                </GroupBox>
+
+                <!-- OBSERVACIONES Y FIRMAS -->
+                <GroupBox Header="Observaciones y Autorización" FontWeight="Bold" Margin="0,0,0,15">
+                    <Grid Margin="10">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                        </Grid.RowDefinitions>
+
+                        <!-- Fila 0: Comentarios / Observaciones -->
+                        <StackPanel Grid.Row="0" Margin="0,0,0,15">
+                            <TextBlock Text="Comentarios / Observaciones:" Margin="0,0,0,3"/>
+                            <TextBox Text="{Binding Observaciones, UpdateSourceTrigger=PropertyChanged}" AcceptsReturn="True" Height="60" TextWrapping="Wrap" Padding="5"/>
+                        </StackPanel>
+
+                        <!-- Fila 1: Autorizante -->
+                        <Grid Grid.Row="1">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+
+                            <StackPanel Grid.Column="1" Margin="5,0,0,0">
+                                <TextBlock Text="Nombre del Autorizante:" Margin="0,0,0,3"/>
+                                <ComboBox ItemsSource="{Binding UsuariosAutorizantes}"
+                                          DisplayMemberPath="NombreCompleto"
+                                          SelectedItem="{Binding UsuarioAutorizanteSeleccionado, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                          Height="30"/>
+                            </StackPanel>
+                        </Grid>
+                    </Grid>
+                </GroupBox>
+
+                <!-- BOTÓN GENERAR -->
+                <Button Content="Generar Requisicion" Command="{Binding GenerarExcelCommand}"
+                        Height="40" Background="#5F70E8" Foreground="White" FontWeight="Bold" FontSize="14"/>
+
+            </StackPanel>
+        </Border>
+    </ScrollViewer>
+</UserControl>

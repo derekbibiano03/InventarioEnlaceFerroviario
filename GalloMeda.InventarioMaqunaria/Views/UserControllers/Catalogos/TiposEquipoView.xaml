@@ -1,0 +1,33 @@
+﻿<UserControl x:Class="Inventario.Desktop.Views.UserControllers.Catalogos.TiposEquipoView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:Inventario.Desktop.Views.UserControllers.Catalogos"
+             mc:Ignorable="d" 
+             d:DesignHeight="450" d:DesignWidth="800">
+    <Grid Margin="20">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+
+        <DataGrid Grid.Row="1" 
+  ItemsSource="{Binding TipoEquipo}" 
+  AutoGenerateColumns="False" 
+  CanUserAddRows="False" 
+  HeadersVisibility="Column"
+  GridLinesVisibility="Horizontal"
+  Background="White"
+  BorderBrush="#CCCCCC"
+  BorderThickness="1"
+  RowHeight="30"
+  AlternatingRowBackground="#F9F9F9">
+
+            <DataGrid.Columns>
+                <DataGridTextColumn Header="No.Economico" Width="Auto" Binding="{Binding IdTipoEquipo}" IsReadOnly="True"/>
+                <DataGridTextColumn Header="Descripción" Width="*" Binding="{Binding DescripcionTipoEquipo}" IsReadOnly="True"/>
+            </DataGrid.Columns>
+        </DataGrid>
+    </Grid>
+</UserControl>
