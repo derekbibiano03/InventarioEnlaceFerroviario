@@ -1,4 +1,4 @@
-name: Compilar y Publicar en cPanel
+name: Publicar en GitHub Releases
 
 on:
   push:
@@ -6,8 +6,11 @@ on:
       - main
 
 jobs:
-  build-and-deploy:
+  build-and-release:
     runs-on: windows-latest
+
+    permissions:
+      contents: write
 
     steps:
     - name: Checkout del código
@@ -32,31 +35,30 @@ jobs:
     - name: Comprimir ejecutable
       run: Compress-Archive -Path ./publish/* -DestinationPath ./InventarioSetup.zip
 
-    - name: Leer version y preparar archivos
+    - name: Leer version y generar update.xml
+      id: version
       run: |
         [xml]$csproj = Get-Content GalloMeda.InventarioMaqunaria/Inventario.Desktop.csproj
         $ver = $csproj.Project.PropertyGroup.Version
-        
-        New-Item -ItemType Directory -Force -Path ./deploy_temp
-        Move-Item -Path ./InventarioSetup.zip -Destination ./deploy_temp/InventarioSetup.zip
+        echo "TAG=v$ver" >> $env:GITHUB_OUTPUT
         
         $xmlContent = @"
         <?xml version="1.0" encoding="utf-8"?>
         <item>
             <version>$ver</version>
-            <url>https://enlaceferroviario.com/updates/InventarioSetup.zip</url>
+            <url>https://github.com/derekbibiano03/InventarioEnlaceFerroviario/releases/latest/download/InventarioSetup.zip</url>
             <changelog>https://github.com/derekbibiano03/InventarioEnlaceFerroviario/releases</changelog>
             <mandatory>false</mandatory>
         </item>
         "@
-        Set-Content -Path "./deploy_temp/update.xml" -Value $xmlContent -Encoding UTF8
+        Set-Content -Path "./update.xml" -Value $xmlContent -Encoding UTF8
 
-    - name: Subir archivos a cPanel via FTP
-      uses: SamKirkland/FTP-Deploy-Action@v4.3.5
+    - name: Crear Release y Subir Archivos
+      uses: softprops/action-gh-release@v2
       with:
-        server: ${{ secrets.FTP_SERVER }}
-        username: ${{ secrets.FTP_USERNAME }}
-        password: ${{ secrets.FTP_PASSWORD }}
-        local-dir: ./deploy_temp/
-        server-dir: ./public_html/updates/
-        protocol: ftp
+        tag_name: ${{ steps.version.outputs.TAG }}
+        name: Versión ${{ steps.version.outputs.TAG }}
+        files: |
+          InventarioSetup.zip
+          update.xml
+        body: "Actualización automática generada desde GitHub Actions."
