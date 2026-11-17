@@ -25,8 +25,6 @@
         public required string THK { get; set; }
         public decimal Horometro { get; set; }
         public string? Dimensiones { get; set; }
-
-        // 4. Booleano del seguro
         public required bool EstatusSeguro { get; set; }
         public string? TipoSeguro { get; set; }
     }

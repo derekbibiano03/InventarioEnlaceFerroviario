@@ -1,6 +1,8 @@
-﻿using Inventario.Core.Services.Logs;
+﻿using Inventario.Core.DTOs;
+using Inventario.Core.Services.Logs;
 using Inventario.Data.Models;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Options;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -12,15 +14,24 @@ namespace Inventario.Core.Services.Economicos
     public class GestorArchivosService
     {
         private readonly InventarioContext _context;
-        private readonly string _hostFtp = "ftp://170.10.162.13/";
-        private readonly string _usuarioFtp = "dbibiano@enlaceferroviario.com";
-        private readonly string _contrasenaFtp = "drbr11122003DRBR.";
-        private readonly string _directorioRemoto = "servidor/ArchivosEconomicos/";
-        private readonly string _directorioRemotoResguardos = "servidor/ArchivosEconomicos/Resguardos/";
-        private readonly string _directorioRemotoMovimientos = "servidor/ArchivosEconomicos/MovimientosEconomicos/";
-        public GestorArchivosService(InventarioContext context)
+        private readonly string _hostFtp;
+        private readonly string _usuarioFtp;
+        private readonly string _contrasenaFtp;
+        private readonly string _directorioRemoto;
+        private readonly string _directorioRemotoResguardos;
+        private readonly string _directorioRemotoMovimientos;
+        public GestorArchivosService(InventarioContext context, IOptions<FtpSettings> ftpSettings)
         {
             _context = context;
+
+            var settings = ftpSettings.Value;
+            _hostFtp = settings.Host;
+            _usuarioFtp = settings.Usuario;
+            _contrasenaFtp = settings.Contrasena;
+            _directorioRemoto = settings.DirectorioRemoto;
+            _directorioRemotoResguardos = settings.DirectorioRemotoResguardos;
+            _directorioRemotoMovimientos = settings.DirectorioRemotoMovimientos;
+
             string rutaTemporalLocal = Path.Combine(Path.GetTempPath(), "ArchivosEconomicosTemp");
             if (!Directory.Exists(rutaTemporalLocal))
             {

@@ -1,6 +1,4 @@
-﻿using System;
-
-namespace Inventario.Core.DTOs.Requisicion
+﻿namespace Inventario.Core.DTOs.Requisicion
 {
     public class RequisicionListDto
     {

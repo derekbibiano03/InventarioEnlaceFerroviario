@@ -115,14 +115,15 @@ namespace Inventario.Desktop.ViewModels.EconomicosViewModel.InfoEconomico
             EmpleadoService empleadoService,
             CatalogoEconomicosService economicosService,
             ResguardosService resguardosService,
-            LogsService logsService)
+            LogsService logsService,
+            GestorArchivosService gestorArchivos)
         {
             _context = context;
             _empleadosService = empleadoService;
             _economicosService = economicosService;
             _resguardosService = resguardosService;
             _logsService = logsService;
-            _gestorArchivosService = new GestorArchivosService(_context);
+            _gestorArchivosService = gestorArchivos;
 
             Empleados = new ObservableCollection<Empleado>();
             Economicos = new ObservableCollection<EconomicoMinimoDto>();

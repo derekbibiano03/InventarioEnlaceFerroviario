@@ -1,11 +1,13 @@
 ﻿using ClosedXML.Excel;
+using Inventario.Core.DTOs;
 using Inventario.Core.DTOs.Requisicion;
 using Inventario.Core.Services; // Asegúrate de incluir el espacio de nombres de tu EmailService
 using Inventario.Data.Models;
 using Microsoft.EntityFrameworkCore;
-using System.Net;
+using Microsoft.Extensions.Options;
 using System.Diagnostics;
 using System.IO;
+using System.Net;
 
 namespace Inventario.Core.Services.Adq_Serv.AdquisicionService
 {
@@ -14,15 +16,21 @@ namespace Inventario.Core.Services.Adq_Serv.AdquisicionService
         private readonly InventarioContext _context;
         private readonly EmailService _emailService;
         private DateTime _fechaActual = DateTime.Now;
-        private readonly string _hostFtp = "ftp://170.10.162.13/";
-        private readonly string _usuarioFtp = "dbibiano@enlaceferroviario.com";
-        private readonly string _contrasenaFtp = "drbr11122003DRBR.";
-        private readonly string _directorioRemoto = "servidor/ArchivosEconomicos/Requisiciones";
+        private readonly string _hostFtp;
+        private readonly string _usuarioFtp;
+        private readonly string _contrasenaFtp;
+        private readonly string _directorioRemotoRequisiciones;
 
-        public AdquisicionService(InventarioContext context, EmailService emailService)
+        public AdquisicionService(InventarioContext context, EmailService emailService, IOptions<FtpSettings> ftpSettings)
         {
             _context = context;
             _emailService = emailService;
+
+            var settings = ftpSettings.Value;
+            _hostFtp = settings.Host;
+            _usuarioFtp = settings.Usuario;
+            _contrasenaFtp = settings.Contrasena;
+            _directorioRemotoRequisiciones = settings.DirectorioRemotoRequisiciones;
         }
 
         public async Task<string> AutorizarYDescargarArchivoAsync(string idRequisicion, string nombreArchivoRemoto, string firmaPath)
@@ -34,7 +42,7 @@ namespace Inventario.Core.Services.Adq_Serv.AdquisicionService
                     throw new Exception("El nombre del archivo remoto es nulo o está vacío.");
                 }
 
-                string directorioLimpio = _directorioRemoto.TrimEnd('/');
+                string directorioLimpio = _directorioRemotoRequisiciones.TrimEnd('/');
                 string archivoLimpio = nombreArchivoRemoto.TrimStart('/');
                 string urlRemota = $"{_hostFtp.TrimEnd('/')}/{directorioLimpio}/{archivoLimpio}";
                 string soloNombreArchivo = Path.GetFileName(nombreArchivoRemoto);
@@ -120,7 +128,7 @@ namespace Inventario.Core.Services.Adq_Serv.AdquisicionService
 
         private void SubirArchivoPorFtp(string rutaLocal, string nombreRemoto)
         {
-            string directorioLimpio = _directorioRemoto.TrimEnd('/');
+            string directorioLimpio = _directorioRemotoRequisiciones.TrimEnd('/');
             string archivoLimpio = nombreRemoto.TrimStart('/');
             string urlDestino = $"{_hostFtp.TrimEnd('/')}/{directorioLimpio}/{archivoLimpio}";
             FtpWebRequest request = (FtpWebRequest)WebRequest.Create(urlDestino);
@@ -302,7 +310,7 @@ namespace Inventario.Core.Services.Adq_Serv.AdquisicionService
                 }
 
                 string archivoLimpio = nombreArchivoRemoto.Replace("\\", "/").TrimStart('/');
-                string directorioLimpio = _directorioRemoto.TrimEnd('/');
+                string directorioLimpio = _directorioRemotoRequisiciones.TrimEnd('/');
                 string urlRemota = $"{_hostFtp.TrimEnd('/')}/{directorioLimpio}/{archivoLimpio}";
                 string soloNombreArchivo = Path.GetFileName(nombreArchivoRemoto);
                 string rutaLocalTemporal = Path.Combine(Path.GetTempPath(), soloNombreArchivo);

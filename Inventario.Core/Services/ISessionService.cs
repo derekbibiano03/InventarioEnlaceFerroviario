@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace Inventario.Core.Services
+﻿namespace Inventario.Core.Services
 {
     public interface ISessionService
     {

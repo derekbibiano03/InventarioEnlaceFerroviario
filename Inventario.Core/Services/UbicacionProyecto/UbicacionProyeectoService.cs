@@ -1,8 +1,4 @@
-﻿using Inventario.Data;
-using Inventario.Data.Models;
-using System;
-using System.Collections.Generic;
-using System.Text;
+﻿using Inventario.Data.Models;
 
 namespace Inventario.Core.Services.UbicacionProyecto
 {

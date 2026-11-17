@@ -1,10 +1,6 @@
-﻿using Inventario.Core.DTOs;
-using Inventario.Core.DTOs.Materiales;
+﻿using Inventario.Core.DTOs.Materiales;
 using Inventario.Data.Models;
 using Microsoft.EntityFrameworkCore;
-using System;
-using System.Collections.Generic;
-using System.Text;
 
 namespace Inventario.Core.Services.Catalogos
 {

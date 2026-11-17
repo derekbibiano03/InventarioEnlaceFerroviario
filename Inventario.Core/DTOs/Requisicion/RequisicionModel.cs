@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Collections.ObjectModel;
-using System.Text;
+﻿using System.Collections.ObjectModel;
 
 namespace Inventario.Core.DTOs.Requisicion
 {
@@ -25,11 +22,11 @@ namespace Inventario.Core.DTOs.Requisicion
         public string Modelo { get; set; } = string.Empty;
         public string NoSerie { get; set; } = string.Empty;
 
-        // Lista de compras
-        public ObservableCollection<ItemRequisicion> Items { get; set; } = new ObservableCollection<ItemRequisicion>();
-
         // Observaciones y Autorización
         public string Observaciones { get; set; } = string.Empty;
         public string Autorizante { get; set; } = string.Empty;
+
+        // Lista de compras
+        public ObservableCollection<ItemRequisicion> Items { get; set; } = new ObservableCollection<ItemRequisicion>();
     }
 }

@@ -1,12 +1,7 @@
 ﻿using Inventario.Core.DTOs;
 using Inventario.Core.Services.Logs;
-using Inventario.Data;
 using Inventario.Data.Models;
 using Microsoft.EntityFrameworkCore;
-using Npgsql;
-using System.Collections.Generic;
-using System.Linq;
-using System.Windows;
 
 namespace Inventario.Core.Services.Economicos
 {

@@ -48,11 +48,11 @@ namespace Inventario.Desktop.ViewModels.UbicacionProyectosViewModel
         public ICommand AbrirArchivoCommand { get; }
         public ICommand DescargarArchivoCommand { get; }
 
-        public DetallesViewModel(string idEconomico)
+        public DetallesViewModel(string idEconomico, GestorArchivosService archivosService)
         {
             _contextoBD = new InventarioContext();
             // 2. Inicialización del servicio encargado de interactuar con el servidor de archivos Ubuntu.
-            _archivosService = new GestorArchivosService(_contextoBD);
+            _archivosService = archivosService;
             _archivosAnexados = new ObservableCollection<CatalogoArchivo>();
             AbrirArchivoCommand = new RelayCommand<CatalogoArchivo>(EjecutarAbrirArchivo);
             DescargarArchivoCommand = new RelayCommand<CatalogoArchivo>(EjecutarDescargarArchivo);

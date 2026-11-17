@@ -1,6 +1,8 @@
-﻿using Inventario.Core.Services.Logs;
+﻿using Inventario.Core.DTOs;
+using Inventario.Core.Services.Logs;
 using Inventario.Data.Models;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Options;
 using System.Net;
 
 namespace Inventario.Core.Services.Economicos
@@ -10,15 +12,21 @@ namespace Inventario.Core.Services.Economicos
         private readonly InventarioContext _context;
         private readonly LogsService _logsService;
 
-        public RealizarMovimientosService(InventarioContext context, LogsService logsService)
+        private readonly string _hostServidor = "170.10.162.13";
+        private readonly string _usuarioFtp;
+        private readonly string _contrasenaFtp;
+
+        public RealizarMovimientosService(InventarioContext context, LogsService logsService, IOptions<FtpSettings> ftpSettings)
         {
             _context = context;
             _logsService = logsService;
+
+            var settings = ftpSettings.Value;
+            _usuarioFtp = settings.Usuario;
+            _contrasenaFtp = settings.Contrasena;
         }
 
-        private readonly string _hostServidor = "170.10.162.13";
-        private readonly string _usuarioFtp = "dbibiano@enlaceferroviario.com";
-        private readonly string _contrasenaFtp = "drbr11122003DRBR.";
+        
 
         public CatalogoMovimientosEconomico RegistrarMovimiento(int idUsuarioOperativo, CatalogoMovimientosEconomico dto)
         {

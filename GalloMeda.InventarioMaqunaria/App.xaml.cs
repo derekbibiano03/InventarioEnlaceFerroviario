@@ -1,8 +1,11 @@
 ﻿using AutoUpdaterDotNET;
+using Inventario.Core.DTOs;
 using Inventario.Core.Services;
 using Inventario.Core.Services.Auth;
+using Inventario.Core.Services.Economicos;
 using Inventario.Core.Services.Logs;
 using Inventario.Data.Models;
+using Microsoft.Extensions.Options;
 using Inventario.Desktop.ViewModels.Auth;
 using Inventario.Desktop.Views;
 using InventarioMaquinaria.Services;
@@ -49,24 +52,20 @@ namespace GalloMeda.InventarioMaqunaria
 
                 IConfiguration configuration = builder.Build();
 
-                // 3. Configurar AutoUpdater
                 string? updateXmlUrl = configuration["GitHubUpdate:XmlUrl"];
 
                 if (!string.IsNullOrWhiteSpace(updateXmlUrl))
                 {
-                    // Usamos Synchronous = true para que compruebe al iniciar de manera controlada
                     AutoUpdater.Synchronous = true;
                     AutoUpdater.ApplicationExitEvent += AutoUpdater_ApplicationExitEvent;
                     AutoUpdater.Start(updateXmlUrl);
                 }
 
-                // Si AutoUpdater programa un cierre para actualizar, evitamos que siga ejecutando el Login
                 if (Environment.HasShutdownStarted)
                 {
                     return;
                 }
 
-                // 4. Configurar Base de Datos y Servicios
                 var serviceCollection = new ServiceCollection();
                 var connectionString = configuration.GetConnectionString("InventarioConnection");
 
@@ -83,10 +82,11 @@ namespace GalloMeda.InventarioMaqunaria
                 serviceCollection.AddScoped<AutenticacionService>();
                 serviceCollection.AddSingleton(configuration);
                 serviceCollection.AddScoped<EmailService>();
+                serviceCollection.Configure<FtpSettings>(configuration.GetSection("ConfiguracionFtp"));
+                serviceCollection.AddScoped<GestorArchivosService>();
 
                 ServiceProvider = serviceCollection.BuildServiceProvider();
 
-                // 5. Iniciar ventana de Login
                 using (var scope = ServiceProvider.CreateScope())
                 {
                     var context = scope.ServiceProvider.GetRequiredService<InventarioContext>();

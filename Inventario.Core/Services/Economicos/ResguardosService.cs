@@ -10,9 +10,6 @@ namespace Inventario.Core.Services.Economicos
     {
         private readonly InventarioContext _context;
         private readonly LogsService _logsService;
-        private readonly string _hostServidor = "170.10.162.13";
-        private readonly string _usuarioFtp = "dbibiano@enlaceferroviario.com";
-        private readonly string _contrasenaFtp = "drbr11122003DRBR.";
 
         public ResguardosService(InventarioContext context, LogsService logsService)
         {

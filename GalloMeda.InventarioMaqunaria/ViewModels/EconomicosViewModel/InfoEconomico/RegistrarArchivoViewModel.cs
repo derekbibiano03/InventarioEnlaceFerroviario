@@ -56,10 +56,10 @@ namespace Inventario.Desktop.ViewModels.EconomicosViewModel.InfoEconomico
         public ICommand GuardarArchivoCommand { get; }
         public int UsuarioLog { get; private set; }
 
-        public RegistrarArchivoViewModel()
+        public RegistrarArchivoViewModel(GestorArchivosService gestorArchivos)
         {
             _contextoBD = new InventarioContext();
-            _gestorArchivosService = new GestorArchivosService(_contextoBD);
+            _gestorArchivosService = gestorArchivos;
             _logsService = new LogsService(_contextoBD);
 
             ListaArchivosSeleccionados.CollectionChanged += (s, e) =>

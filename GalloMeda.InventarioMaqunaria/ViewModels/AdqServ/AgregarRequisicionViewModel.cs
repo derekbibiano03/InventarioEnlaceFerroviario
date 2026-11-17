@@ -21,6 +21,8 @@ namespace Inventario.Desktop.ViewModels.AdqServ
 {
     public class AgregarRequisicionViewModel : INotifyPropertyChanged
     {
+
+        public Action OnRegistroRequisicionCompletado { get; set; }
         public event PropertyChangedEventHandler? PropertyChanged;
 
         protected void OnPropertyChanged([CallerMemberName] string? name = null)
