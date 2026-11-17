@@ -1,10 +1,7 @@
-﻿using Inventario.Core.DTOs;
-using Inventario.Core.Services;
-using Inventario.Core.Services.Adq_Serv.AdquisicionService;
+﻿using GalloMeda.InventarioMaqunaria;
 using Inventario.Desktop.ViewModels.AdqServ;
 using Inventario.Desktop.Views.UserControllers.Adquisiciones_Servicios.OrdenesCompra;
-using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.Options; 
+using Microsoft.Extensions.DependencyInjection;
 using System.Windows.Controls;
 
 namespace Inventario.Desktop.Views.UserControllers.Adquisiciones_Servicios.Requisiciones
@@ -15,35 +12,22 @@ namespace Inventario.Desktop.Views.UserControllers.Adquisiciones_Servicios.Requi
         {
             InitializeComponent();
 
-            var configuration = new ConfigurationBuilder()
-                .SetBasePath(AppDomain.CurrentDomain.BaseDirectory)
-                .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true)
-                .Build();
-
-            var context = new Data.Models.InventarioContext();
-            var emailService = new EmailService(configuration);
-
-            var ftpSettings = Options.Create(configuration.GetSection("ConfiguracionFtp").Get<FtpSettings>() ?? new FtpSettings());
-
-            var adquisicionService = new AdquisicionService(context, emailService, ftpSettings);
-
-            var viewModel = new BuscarRequisicionesViewModel(adquisicionService, context, onRecargarBusqueda: () =>
+            // Resolvemos el ViewModel de forma segura a través del contenedor global de dependencias
+            using (var scope = App.ServiceProvider.CreateScope())
             {
-                if (this.Parent is ContentControl parentControl)
-                {
-                    parentControl.Content = new BuscarRequisicionView(); 
-                }
-            });
+                var viewModel = scope.ServiceProvider.GetRequiredService<BuscarRequisicionesViewModel>();
 
-            viewModel.GenerarOCAction = (idRequisicion) =>
-            {
-                if (this.Parent is ContentControl parentControl)
+                // Configuramos la acción de recarga de la vista
+                viewModel.GenerarOCAction = (idRequisicion) =>
                 {
-                    parentControl.Content = new OrdenCompraView(idRequisicion);
-                }
-            };
+                    if (this.Parent is ContentControl parentControl)
+                    {
+                        parentControl.Content = new OrdenCompraView(idRequisicion);
+                    }
+                };
 
-            this.DataContext = viewModel;
+                this.DataContext = viewModel;
+            }
         }
     }
 }

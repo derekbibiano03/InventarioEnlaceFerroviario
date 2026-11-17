@@ -207,7 +207,6 @@ namespace Inventario.Core.Services.Economicos
 
                 SubirArchivoPorFtpMovimientos(rutaOriginal, nombreFisicoUnico);
 
-                // 1. Creamos y guardamos el archivo en el catálogo principal
                 var catalogoArchivo = new CatalogoArchivo
                 {
                     Archivo = nombreFisicoUnico,

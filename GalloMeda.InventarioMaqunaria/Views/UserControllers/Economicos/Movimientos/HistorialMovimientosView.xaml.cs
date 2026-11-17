@@ -37,13 +37,7 @@ namespace Inventario.Desktop.Views.UserControllers.Economicos
             var economicosService = new CatalogoEconomicosService(context, logsService);
             var realizarMovimientosService = new RealizarMovimientosService(context, logsService, ftpSettings);
 
-            var viewModel = new RealizarMovimientoViewModel(ubicacionService, economicosService, realizarMovimientosService, gestorArchivosService, onRegistroMovimientoCompletado: () =>
-            {
-                if (this.Parent is ContentControl parentControl)
-                {
-                    parentControl.Content = new HistorialMovimientosView();
-                }
-            });
+            var viewModel = new RealizarMovimientoViewModel(ubicacionService, economicosService, realizarMovimientosService, gestorArchivosService);
             this.DataContext = viewModel;
         }
     }

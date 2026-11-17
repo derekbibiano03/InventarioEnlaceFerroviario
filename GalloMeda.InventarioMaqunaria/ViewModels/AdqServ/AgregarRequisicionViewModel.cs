@@ -5,6 +5,7 @@ using Inventario.Core.Services.Adq_Serv.AdquisicionService;
 using Inventario.Core.Services.Auth;
 using Inventario.Data.Models;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Win32;
 using System;
 using System.Collections.ObjectModel;
@@ -21,7 +22,6 @@ namespace Inventario.Desktop.ViewModels.AdqServ
 {
     public class AgregarRequisicionViewModel : INotifyPropertyChanged
     {
-
         public Action OnRegistroRequisicionCompletado { get; set; }
         public event PropertyChangedEventHandler? PropertyChanged;
 
@@ -36,8 +36,9 @@ namespace Inventario.Desktop.ViewModels.AdqServ
         public ObservableCollection<Usuario> UsuariosCompras { get; } = new();
         public ObservableCollection<Usuario> UsuariosAutorizantes { get; } = new();
 
-        private readonly InventarioContext _contexto;
+        private readonly IServiceScopeFactory _scopeFactory;
         private readonly UsuariosService _usuariosService;
+        private readonly AdquisicionService _adquisicionService;
         private readonly Action _onRegistroRequisicionCompletado;
 
         public ICommand AñadirConceptoCommand { get; }
@@ -71,7 +72,7 @@ namespace Inventario.Desktop.ViewModels.AdqServ
                     _usuarioAutorizanteSeleccionado = value;
                     OnPropertyChanged();
                     FirmaAutorizante = value?.NombreCompleto;
-                    CorreoE = value?.Correoe; // <-- CORREGIDO AQUÍ (Correoe en minúscula)
+                    CorreoE = value?.Correoe;
                 }
             }
         }
@@ -130,7 +131,6 @@ namespace Inventario.Desktop.ViewModels.AdqServ
                 _tipoRequiSeleccionada = value;
                 OnPropertyChanged(nameof(TipoRequiSeleccionada));
 
-                // Si la requisición no es para económico, vaciamos todos los datos de la unidad
                 if (_tipoRequiSeleccionada != "REQUISICION PARA ECONOMICO")
                 {
                     EconomicoSeleccionado = null;
@@ -181,7 +181,6 @@ namespace Inventario.Desktop.ViewModels.AdqServ
             get => _consecutivoGenerado;
             set { _consecutivoGenerado = value; OnPropertyChanged(); }
         }
-
 
         private string? _observaciones;
         public string? Observaciones
@@ -260,9 +259,6 @@ namespace Inventario.Desktop.ViewModels.AdqServ
             set { _serieUnidad = value; OnPropertyChanged(); }
         }
 
-
-
-
         public ObservableCollection<CatalogoMarca> ListaMarcas { get; set; } = new();
         public ObservableCollection<CatalogoTiposCombustible> ListaMotores { get; set; } = new();
         public ICollectionView VistaRequisicion { get; set; }
@@ -317,22 +313,22 @@ namespace Inventario.Desktop.ViewModels.AdqServ
             }
         }
 
-        private readonly AdquisicionService _adquisicionService;
         public event EventHandler? RequisicionRegistrada;
+
         public AgregarRequisicionViewModel(
-            InventarioContext contexto, 
-            UsuariosService usuariosService, 
-            AdquisicionService adquisicionService, 
-            Action onRegistroRequisicionCompletado)
+            IServiceScopeFactory scopeFactory,
+            UsuariosService usuariosService,
+            AdquisicionService adquisicionService,
+            Action? onRegistroRequisicionCompletado = null)
         {
+            _scopeFactory = scopeFactory ?? throw new ArgumentNullException(nameof(scopeFactory));
             _usuariosService = usuariosService ?? throw new ArgumentNullException(nameof(usuariosService));
-            _contexto = contexto ?? throw new ArgumentNullException(nameof(contexto));
             _adquisicionService = adquisicionService ?? throw new ArgumentNullException(nameof(adquisicionService));
+            _onRegistroRequisicionCompletado = onRegistroRequisicionCompletado ?? (() => { });
 
             AñadirConceptoCommand = new RelayCommand(EjecutarAñadirConcepto);
             EliminarConceptoCommand = new RelayCommand(EjecutarEliminarConcepto);
             GenerarExcelCommand = new RelayCommand(EjecutarGenerarExcel);
-            _onRegistroRequisicionCompletado = onRegistroRequisicionCompletado;
 
             CargarUsuarios();
             CargarCatalogos();
@@ -352,7 +348,7 @@ namespace Inventario.Desktop.ViewModels.AdqServ
 
             UsuariosAutorizantes.Clear();
             var datosusuariosautorizantes = _usuariosService.ObtenerUsuariosAutorizantes();
-            if (datosusuarioscompras != null)
+            if (datosusuariosautorizantes != null)
             {
                 foreach (var usuario in datosusuariosautorizantes)
                 {
@@ -389,25 +385,25 @@ namespace Inventario.Desktop.ViewModels.AdqServ
         {
             try
             {
-                if (EmpresaSeleccionada == null || (EmpresaSeleccionada == "")) // Ajusta según el tipo de dato de tu IdEconomico
+                if (string.IsNullOrEmpty(EmpresaSeleccionada))
                 {
                     MessageBox.Show("Seleccione una empresa para la requisicion.", "Validación", MessageBoxButton.OK, MessageBoxImage.Warning);
                     return;
                 }
 
-                if (GradoPrioridadSeleccionado == null || (GradoPrioridadSeleccionado == "")) // Ajusta según el tipo de dato de tu IdEconomico
+                if (string.IsNullOrEmpty(GradoPrioridadSeleccionado))
                 {
                     MessageBox.Show("Seleccione un grado de prioridad para generar la requisicion.", "Validación", MessageBoxButton.OK, MessageBoxImage.Warning);
                     return;
                 }
 
-                if (UbicacionSeleccionada == null || (UbicacionSeleccionada == "")) // Ajusta según el tipo de dato de tu IdEconomico
+                if (string.IsNullOrEmpty(UbicacionSeleccionada))
                 {
                     MessageBox.Show("Seleccione una ubicacion para la requisicion.", "Validación", MessageBoxButton.OK, MessageBoxImage.Warning);
                     return;
                 }
 
-                if (TipoRequiSeleccionada == null || (TipoRequiSeleccionada == "")) // Ajusta según el tipo de dato de tu IdEconomico
+                if (string.IsNullOrEmpty(TipoRequiSeleccionada))
                 {
                     MessageBox.Show("Seleccione un tipo de requisicion.", "Validación", MessageBoxButton.OK, MessageBoxImage.Warning);
                     return;
@@ -424,23 +420,29 @@ namespace Inventario.Desktop.ViewModels.AdqServ
                     MessageBox.Show("Debe agregar al menos un concepto en la orden de compra.", "Validación", MessageBoxButton.OK, MessageBoxImage.Warning);
                     return;
                 }
-                
+
                 if (UsuarioAutorizanteSeleccionado == null)
                 {
                     MessageBox.Show("Seleccione a una persona para que autorize la requisicion.", "Validación", MessageBoxButton.OK, MessageBoxImage.Warning);
                     return;
                 }
 
-
                 int idUbicacionReal = Ubicaciones.FirstOrDefault(u => u.Siglas == UbicacionSeleccionada)?.IdUbicacion ?? 0;
+                int siguienteConsecutivo = 0;
 
-                // 1. Calculamos el consecutivo primero para que exista en el contexto actual
-                int ultimoConsecutivoTemp = _contexto.Requisiciones
-                    .Where(r => r.Empresa == EmpresaSeleccionada && r.IdUbicacion == idUbicacionReal)
-                    .Select(r => (int?)r.Consecutivo)
-                    .Max() ?? 0;
+                // Consulta segura abriendo un ámbito temporal para calcular el consecutivo exacto
+                using (var scope = _scopeFactory.CreateScope())
+                {
+                    var contextoTemporal = scope.ServiceProvider.GetRequiredService<InventarioContext>();
+                    int ultimoConsecutivoTemp = contextoTemporal.Requisiciones
+                        .Where(r => r.Empresa == EmpresaSeleccionada && r.IdUbicacion == idUbicacionReal)
+                        .Select(r => (int?)r.Consecutivo)
+                        .Max() ?? 0;
 
-                string nombreArchivoRemoto = $"{EmpresaSeleccionada} - RC - {(ultimoConsecutivoTemp + 1):D3} - {UbicacionSeleccionada} - {FechaActual:yyyy}.xlsx";
+                    siguienteConsecutivo = ultimoConsecutivoTemp + 1;
+                }
+
+                string nombreArchivoRemoto = $"{EmpresaSeleccionada} - RC - {siguienteConsecutivo:D3} - {UbicacionSeleccionada} - {FechaActual:yyyy}.xlsx";
                 string rutaTemporal = Path.Combine(Path.GetTempPath(), nombreArchivoRemoto);
 
                 using (var workbook = new XLWorkbook())
@@ -448,7 +450,6 @@ namespace Inventario.Desktop.ViewModels.AdqServ
                     var ws = workbook.Worksheets.Add("Requisición");
                     ws.ShowGridLines = true;
 
-                    // Desproteger la hoja y el libro para garantizar edición abierta
                     ws.Unprotect();
                     workbook.Unprotect();
 
@@ -485,7 +486,7 @@ namespace Inventario.Desktop.ViewModels.AdqServ
                         MessageBox.Show($"No se encontró la imagen en la ruta: {imagePath}", "Advertencia", MessageBoxButton.OK, MessageBoxImage.Warning);
                     }
 
-                    string folioDinamico = $"{EmpresaSeleccionada} - RC - {(ultimoConsecutivoTemp + 1):D3} - {UbicacionSeleccionada} - {FechaActual:yyyy}";
+                    string folioDinamico = $"{EmpresaSeleccionada} - RC - {siguienteConsecutivo:D3} - {UbicacionSeleccionada} - {FechaActual:yyyy}";
 
                     var rangoTitulo = ws.Range("E1:G1");
                     rangoTitulo.Merge();
@@ -697,11 +698,12 @@ namespace Inventario.Desktop.ViewModels.AdqServ
                     fechaRequisicion: DateOnly.FromDateTime(FechaActual),
                     tipoRequisicion: TipoRequiSeleccionada ?? "REQUISICION GENERICA",
                     empresa: EmpresaSeleccionada ?? "CGM",
-                    estatus: "EN ESPERA DE SER AUTORIAZADA",
+                    estatus: "EN ESPERA DE SER AUTORIZADA",
                     rutaArchivoLocal: rutaTemporal,
                     nombreArchivoRemoto: nombreArchivoRemoto,
                     idEconomico: EconomicoSeleccionado?.IdEconomico,
-                    gradoPrioridad: GradoPrioridadSeleccionado
+                    gradoPrioridad: GradoPrioridadSeleccionado,
+                    consecutivoForzado: siguienteConsecutivo
                 );
 
                 if (exito)
@@ -728,25 +730,30 @@ namespace Inventario.Desktop.ViewModels.AdqServ
         {
             try
             {
-                var ubicacionesDb = _contexto.CatalogoUbicacionesProyectos
-                    .Where(e => !string.IsNullOrEmpty(e.Siglas)) // Filtra nulos, vacíos y espacios si usas IsNullOrWhiteSpace
-                    .AsNoTracking()
-                    .ToList();
+                using (var scope = _scopeFactory.CreateScope())
+                {
+                    var contextoTemporal = scope.ServiceProvider.GetRequiredService<InventarioContext>();
 
-                Ubicaciones.Clear();
-                foreach (var item in ubicacionesDb) { Ubicaciones.Add(item); }
+                    var ubicacionesDb = contextoTemporal.CatalogoUbicacionesProyectos
+                        .Where(e => !string.IsNullOrEmpty(e.Siglas))
+                        .AsNoTracking()
+                        .ToList();
 
-                var economicosDb = _contexto.CatalogoEconomicos.AsNoTracking().ToList();
-                Economicos.Clear();
-                foreach (var item in economicosDb) { Economicos.Add(item); }
+                    Ubicaciones.Clear();
+                    foreach (var item in ubicacionesDb) { Ubicaciones.Add(item); }
 
-                var marcasDb = _contexto.Set<CatalogoMarca>().AsNoTracking().ToList();
-                ListaMarcas.Clear();
-                foreach (var marca in marcasDb) { ListaMarcas.Add(marca); }
+                    var economicosDb = contextoTemporal.CatalogoEconomicos.AsNoTracking().ToList();
+                    Economicos.Clear();
+                    foreach (var item in economicosDb) { Economicos.Add(item); }
 
-                var combustiblesDb = _contexto.Set<CatalogoTiposCombustible>().AsNoTracking().ToList();
-                ListaMotores.Clear();
-                foreach (var combustible in combustiblesDb) { ListaMotores.Add(combustible); }
+                    var marcasDb = contextoTemporal.Set<CatalogoMarca>().AsNoTracking().ToList();
+                    ListaMarcas.Clear();
+                    foreach (var marca in marcasDb) { ListaMarcas.Add(marca); }
+
+                    var combustiblesDb = contextoTemporal.Set<CatalogoTiposCombustible>().AsNoTracking().ToList();
+                    ListaMotores.Clear();
+                    foreach (var combustible in combustiblesDb) { ListaMotores.Add(combustible); }
+                }
             }
             catch (Exception ex)
             {

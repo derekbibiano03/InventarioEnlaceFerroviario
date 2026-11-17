@@ -1,17 +1,21 @@
 ﻿using AutoUpdaterDotNET;
 using Inventario.Core.DTOs;
 using Inventario.Core.Services;
+using Inventario.Core.Services.Adq_Serv.AdquisicionService;
 using Inventario.Core.Services.Auth;
 using Inventario.Core.Services.Economicos;
 using Inventario.Core.Services.Logs;
+using Inventario.Core.Services.UbicacionProyecto;
 using Inventario.Data.Models;
-using Microsoft.Extensions.Options;
+using Inventario.Desktop.ViewModels.AdqServ;
 using Inventario.Desktop.ViewModels.Auth;
+using Inventario.Desktop.ViewModels.EconomicosViewModel.Movimientos;
 using Inventario.Desktop.Views;
 using InventarioMaquinaria.Services;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Options;
 using Newtonsoft.Json.Linq;
 using System;
 using System.IO;
@@ -75,15 +79,30 @@ namespace GalloMeda.InventarioMaqunaria
                 }
 
                 serviceCollection.AddDbContext<InventarioContext>(options =>
-                    options.UseMySql(connectionString, ServerVersion.AutoDetect(connectionString))
-                );
-
+    options.UseMySql(connectionString, ServerVersion.AutoDetect(connectionString))
+);
                 serviceCollection.AddScoped<LogsService>();
                 serviceCollection.AddScoped<AutenticacionService>();
+                serviceCollection.AddScoped<UsuariosService>(); 
                 serviceCollection.AddSingleton(configuration);
                 serviceCollection.AddScoped<EmailService>();
                 serviceCollection.Configure<FtpSettings>(configuration.GetSection("ConfiguracionFtp"));
                 serviceCollection.AddScoped<GestorArchivosService>();
+                serviceCollection.AddScoped<RealizarMovimientosService>();
+                serviceCollection.AddScoped<CatalogoEconomicosService>();
+                serviceCollection.AddTransient<RealizarMovimientoViewModel>();
+                serviceCollection.AddScoped<UbicacionProyeectoService>();
+                serviceCollection.AddScoped<AdquisicionService>();
+                serviceCollection.AddTransient<AgregarRequisicionViewModel>();
+                serviceCollection.AddTransient<ListaRequisicionesViewModel>();
+
+                var viewModelTypes = System.Reflection.Assembly.GetExecutingAssembly().GetTypes()
+    .Where(t => t.Name.EndsWith("ViewModel") && !t.IsAbstract && t.IsClass);
+
+                foreach (var type in viewModelTypes)
+                {
+                    serviceCollection.AddTransient(type);
+                }
 
                 ServiceProvider = serviceCollection.BuildServiceProvider();
 

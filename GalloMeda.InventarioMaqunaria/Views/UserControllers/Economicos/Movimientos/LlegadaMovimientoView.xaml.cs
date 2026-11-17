@@ -8,7 +8,7 @@ namespace Inventario.Desktop.Views.UserControllers.Economicos.Movimientos
         public LlegadaMovimientoView(ReciboEquipoViewModel viewmodel)
         {
             InitializeComponent();
-            DataContext = viewmodel; // 👈 Asigna el ViewModel aquí
+            DataContext = viewmodel; 
             viewmodel.RequestClose += (success) =>
             {
                 this.DialogResult = success;

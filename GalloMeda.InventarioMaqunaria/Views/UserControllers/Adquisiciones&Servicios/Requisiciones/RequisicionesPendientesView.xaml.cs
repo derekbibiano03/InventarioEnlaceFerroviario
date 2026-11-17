@@ -1,10 +1,8 @@
-﻿using Inventario.Core.DTOs;
-using Inventario.Core.Services;
-using Inventario.Core.Services.Adq_Serv.AdquisicionService;
+﻿using GalloMeda.InventarioMaqunaria;
 using Inventario.Desktop.ViewModels.AdqServ;
-using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
+using System.Windows;
 using System.Windows.Controls;
-using Microsoft.Extensions.Options;
 
 namespace Inventario.Desktop.Views.UserControllers.Adquisiciones_Servicios.Requisiciones
 {
@@ -17,21 +15,12 @@ namespace Inventario.Desktop.Views.UserControllers.Adquisiciones_Servicios.Requi
         {
             InitializeComponent();
 
-            // Construir la configuración local para el servicio de correo
-            var configuration = new ConfigurationBuilder()
-             .SetBasePath(AppDomain.CurrentDomain.BaseDirectory)
-             .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true)
-             .Build();
-            var ftpSettings = Options.Create(configuration.GetSection("ConfiguracionFtp").Get<FtpSettings>() ?? new FtpSettings());
-
-            // Instanciar las dependencias necesarias para el ViewModel
-            var context = new Data.Models.InventarioContext();
-            var emailService = new EmailService(configuration);
-                                        
-            var adquisicionService = new AdquisicionService(context, emailService, ftpSettings);
-
-            // Asignar el ViewModel pasándole el servicio requerido
-            this.DataContext = new ListaRequisicionesViewModel(adquisicionService);
+            // Solución: Obtenemos el ViewModel a través del contenedor global de dependencias de la aplicación
+            using (var scope = App.ServiceProvider.CreateScope())
+            {
+                var viewModel = scope.ServiceProvider.GetRequiredService<ListaRequisicionesViewModel>();
+                this.DataContext = viewModel;
+            }
         }
 
         private void DataGrid_SelectionChanged(object sender, SelectionChangedEventArgs e)

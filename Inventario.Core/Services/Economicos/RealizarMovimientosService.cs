@@ -12,7 +12,7 @@ namespace Inventario.Core.Services.Economicos
         private readonly InventarioContext _context;
         private readonly LogsService _logsService;
 
-        private readonly string _hostServidor = "170.10.162.13";
+        private readonly string _hostServidor; // Ej: "ftp://170.10.162.13/"
         private readonly string _usuarioFtp;
         private readonly string _contrasenaFtp;
 
@@ -22,11 +22,11 @@ namespace Inventario.Core.Services.Economicos
             _logsService = logsService;
 
             var settings = ftpSettings.Value;
+            // Aseguramos que termine con '/' para evitar errores al concatenar rutas
+            _hostServidor = settings.Host.EndsWith("/") ? settings.Host : settings.Host + "/";
             _usuarioFtp = settings.Usuario;
             _contrasenaFtp = settings.Contrasena;
         }
-
-        
 
         public CatalogoMovimientosEconomico RegistrarMovimiento(int idUsuarioOperativo, CatalogoMovimientosEconomico dto)
         {
@@ -45,7 +45,10 @@ namespace Inventario.Core.Services.Economicos
 
             var actualizarUbicacion = _context.CatalogoEconomicos
                                             .FirstOrDefault(s => s.IdEconomico == nuevoMovimiento.IdEconomico);
-            actualizarUbicacion.IdUbicacion = nuevoMovimiento.IdUbicacionLlegada;
+            if (actualizarUbicacion != null)
+            {
+                actualizarUbicacion.IdUbicacion = nuevoMovimiento.IdUbicacionLlegada;
+            }
 
             _context.CatalogoMovimientosEconomicos.Add(nuevoMovimiento);
             _context.SaveChanges();
@@ -66,7 +69,6 @@ namespace Inventario.Core.Services.Economicos
             {
                 foreach (var archivo in archivosProcesados)
                 {
-                    // Creamos la relación intermedia correcta apuntando al archivo ya existente
                     var relacionMovimiento = new MovimientosArchivo
                     {
                         IdMovimiento = idMovimiento,
@@ -88,6 +90,8 @@ namespace Inventario.Core.Services.Economicos
             }
             try
             {
+                // Limpiamos la ruta del archivo que viene de la BD quitándole el host si lo trae incluido
+                string hostSinProtocolo = _hostServidor.Replace("ftp://", "", StringComparison.OrdinalIgnoreCase);
                 string rutaLimpia = rutaRemotaServidor.Replace("ftp://", "", StringComparison.OrdinalIgnoreCase).TrimStart('/');
 
                 if (rutaLimpia.StartsWith("http://", StringComparison.OrdinalIgnoreCase))
@@ -100,12 +104,13 @@ namespace Inventario.Core.Services.Economicos
                 }
 
                 string rutaRelativa = rutaLimpia;
-                if (rutaLimpia.StartsWith(_hostServidor, StringComparison.OrdinalIgnoreCase))
+                if (rutaLimpia.StartsWith(hostSinProtocolo, StringComparison.OrdinalIgnoreCase))
                 {
-                    rutaRelativa = rutaLimpia.Substring(_hostServidor.Length).TrimStart('/');
+                    rutaRelativa = rutaLimpia.Substring(hostSinProtocolo.Length).TrimStart('/');
                 }
 
-                string urlFtp = $"ftp://{_hostServidor}/{rutaRelativa}";
+                // Como _hostServidor ya trae "ftp://.../", simplemente concatenamos la ruta relativa limpia
+                string urlFtp = $"{_hostServidor}{rutaRelativa}";
                 string nombreArchivo = Path.GetFileName(urlFtp);
                 string rutaTemporalLocal = Path.Combine(Path.GetTempPath(), $"{Guid.NewGuid()}_{nombreArchivo}");
 
@@ -137,7 +142,7 @@ namespace Inventario.Core.Services.Economicos
                 .Include(h => h.IdUbicacionLlegadaNavigation)
                 .Include(h => h.IdUbicacionSalidaNavigation)
                 .Include(s => s.MovimientosArchivos)
-                    .ThenInclude(ma => ma.IdArchivoNavigation) // 👈 ESTO ES LO QUE FALTABA
+                    .ThenInclude(ma => ma.IdArchivoNavigation)
                 .Include(s => s.IdUsuarioNavigation)
                 .ToList();
         }
@@ -147,14 +152,13 @@ namespace Inventario.Core.Services.Economicos
             var movimientoExistente = _context.CatalogoMovimientosEconomicos
                                             .FirstOrDefault(s => s.IdMovimiento == movimientoModel.IdMovimiento);
 
-            if (movimientoExistente == null) // 👈 CORREGIDO: Evaluamos movimientoExistente, no movimientoModel
+            if (movimientoExistente == null)
             {
                 throw new Exception($"No se encontró el registro con ID {movimientoModel.IdMovimiento}.");
             }
 
-            // 👈 CORREGIDO: Asignamos al objeto de la base de datos
             movimientoExistente.FechaLlegada = movimientoModel.FechaLlegada;
-            movimientoExistente.AnotacionesLlegada = movimientoModel.AnotacionesLlegada; // O AnotacionesLlegada según tu modelo
+            movimientoExistente.AnotacionesLlegada = movimientoModel.AnotacionesLlegada;
 
             _context.SaveChanges();
         }

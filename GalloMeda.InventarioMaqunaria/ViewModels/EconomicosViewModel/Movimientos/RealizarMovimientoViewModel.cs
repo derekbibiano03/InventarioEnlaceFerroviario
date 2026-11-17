@@ -8,6 +8,7 @@ using Inventario.Data.Models;
 using Inventario.Desktop.ViewModels.EconomicosViewModel.Servicios;
 using Inventario.Desktop.Views;
 using Inventario.Desktop.Views.UserControllers.Economicos.Movimientos;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Win32;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
@@ -112,13 +113,13 @@ namespace Inventario.Desktop.ViewModels.EconomicosViewModel.Movimientos
         }
 
         public event EventHandler? MovimientoRegistrado;
-        private readonly Action _onRegistroMovimientoCompletado;
+
+        public Action? OnRegistroMovimientoCompletado { get; set; }
         public RealizarMovimientoViewModel(
             UbicacionProyeectoService ubicacionService,
             CatalogoEconomicosService economicosService,
             RealizarMovimientosService realizarMovimientosService,
-            GestorArchivosService gestorArchivosService,
-            Action onRegistroMovimientoCompletado)
+            GestorArchivosService gestorArchivosService)
         {
             _ubicacionesService = ubicacionService;
             _economicosService = economicosService;
@@ -139,24 +140,30 @@ namespace Inventario.Desktop.ViewModels.EconomicosViewModel.Movimientos
             _vistaHistorialMovimientos = CollectionViewSource.GetDefaultView(MovimientosEconomicos);
             _vistaHistorialMovimientos.Filter = FiltrarPorEconomico;
 
-            _onRegistroMovimientoCompletado = onRegistroMovimientoCompletado;
+            
             CargarTipos();
             CargarHistorialMovimientos();
         }
 
-        public void LlegadaEconomico(CatalogoMovimientosEconomico? movimiento) 
+        public void LlegadaEconomico(CatalogoMovimientosEconomico? movimiento)
         {
             if (movimiento == null) return;
 
-            var editViewModel = new ReciboEquipoViewModel(movimiento, _movimientosService, _gestorArchivosService);
-            var ventanaEditar = new LlegadaMovimientoView(editViewModel)
+            using (var scope = App.ServiceProvider.CreateScope())
             {
-                Owner = Application.Current.MainWindow
-            };
+                var gestorArchivos = scope.ServiceProvider.GetRequiredService<GestorArchivosService>();
+                var realizarMovimientos = scope.ServiceProvider.GetRequiredService<RealizarMovimientosService>();
 
-            if (ventanaEditar.ShowDialog() == true)
-            {
-                CargarHistorialMovimientos();
+                var editViewModel = new ReciboEquipoViewModel(movimiento, realizarMovimientos, gestorArchivos);
+                var ventanaEditar = new LlegadaMovimientoView(editViewModel)
+                {
+                    Owner = Application.Current.MainWindow
+                };
+
+                if (ventanaEditar.ShowDialog() == true)
+                {
+                    CargarHistorialMovimientos();
+                }
             }
         }
 
@@ -274,7 +281,7 @@ namespace Inventario.Desktop.ViewModels.EconomicosViewModel.Movimientos
 
                 MessageBox.Show("Se registró el Servicio y sus archivos de manera exitosa.", "Éxito", MessageBoxButton.OK, MessageBoxImage.Information);
                 MovimientoRegistrado?.Invoke(this, EventArgs.Empty);
-                _onRegistroMovimientoCompletado?.Invoke();
+                OnRegistroMovimientoCompletado?.Invoke();
 
                 CargarHistorialMovimientos();
             }

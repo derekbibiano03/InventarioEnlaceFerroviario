@@ -11,6 +11,7 @@ using System.Collections.ObjectModel;
 using System.IO;
 using System.Windows.Data;
 using System.Windows.Input;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace Inventario.Desktop.ViewModels.AdqServ
 {
@@ -125,15 +126,17 @@ namespace Inventario.Desktop.ViewModels.AdqServ
         }
 
         private readonly AdquisicionService _reqService;
-        private readonly ExcelExportService _excelService;
-        private readonly InventarioContext _context;
+        private readonly IServiceScopeFactory _scopeFactory;
         public event EventHandler? RecargaBusqueda;
 
-        public BuscarRequisicionesViewModel(AdquisicionService reqService, InventarioContext context, Action onRecargarBusqueda)
+        public BuscarRequisicionesViewModel(
+            AdquisicionService reqService,
+            IServiceScopeFactory scopeFactory,
+            Action? onRecargarBusqueda = null) // 👈 Opcional con valor por defecto para la reflexión
         {
             _reqService = reqService ?? throw new ArgumentNullException(nameof(reqService));
-            _context = context ?? throw new ArgumentNullException(nameof(context));
-            _excelService = new ExcelExportService(_context);
+            _scopeFactory = scopeFactory ?? throw new ArgumentNullException(nameof(scopeFactory));
+            _onRecargarBusqueda = onRecargarBusqueda ?? (() => { });
 
             VerExcelCommand = new RelayCommand(_ => AbrirArchivoExcel());
             LimpiarFiltrosCommand = new RelayCommand(_ => LimpiarFiltros());
@@ -145,11 +148,7 @@ namespace Inventario.Desktop.ViewModels.AdqServ
             LiquidarProcesoCommand = new RelayCommand(async (obj) => await EjecutarLiquidarProcesoAsync());
 
             ExportarExcelCommand = new RelayCommand(_ => EjecutarExportacion());
-
-            // CORREGIDO: Se inicializa correctamente el comando usando una expresión lambda
             GenerarOCCommand = new RelayCommand(_ => EjecutarGenerarOC());
-
-            _onRecargarBusqueda = onRecargarBusqueda;
 
             _ = CargarTodasRequisicionesAsync();
         }
@@ -238,7 +237,13 @@ namespace Inventario.Desktop.ViewModels.AdqServ
 
             List<Requisicione> datosCompletos = await _reqService.ObtenerRequisicionesPorIdsAsync(idsDeEquiposFiltrados);
 
-            byte[] archivoExcelBytes = _excelService.GenerarExcelRequisiciones(datosCompletos);
+            byte[] archivoExcelBytes;
+            using (var scope = _scopeFactory.CreateScope())
+            {
+                var contextTemp = scope.ServiceProvider.GetRequiredService<InventarioContext>();
+                var excelServiceTemp = new ExcelExportService(contextTemp);
+                archivoExcelBytes = excelServiceTemp.GenerarExcelRequisiciones(datosCompletos);
+            }
 
             Microsoft.Win32.SaveFileDialog saveFileDialog = new Microsoft.Win32.SaveFileDialog
             {

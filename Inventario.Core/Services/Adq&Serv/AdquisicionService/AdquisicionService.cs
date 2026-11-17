@@ -1,9 +1,10 @@
 ﻿using ClosedXML.Excel;
 using Inventario.Core.DTOs;
 using Inventario.Core.DTOs.Requisicion;
-using Inventario.Core.Services; // Asegúrate de incluir el espacio de nombres de tu EmailService
+using Inventario.Core.Services;
 using Inventario.Data.Models;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
 using System.Diagnostics;
 using System.IO;
@@ -13,7 +14,7 @@ namespace Inventario.Core.Services.Adq_Serv.AdquisicionService
 {
     public class AdquisicionService
     {
-        private readonly InventarioContext _context;
+        private readonly IServiceScopeFactory _scopeFactory; // 👈 Fábrica segura de ámbitos
         private readonly EmailService _emailService;
         private DateTime _fechaActual = DateTime.Now;
         private readonly string _hostFtp;
@@ -21,9 +22,9 @@ namespace Inventario.Core.Services.Adq_Serv.AdquisicionService
         private readonly string _contrasenaFtp;
         private readonly string _directorioRemotoRequisiciones;
 
-        public AdquisicionService(InventarioContext context, EmailService emailService, IOptions<FtpSettings> ftpSettings)
+        public AdquisicionService(IServiceScopeFactory scopeFactory, EmailService emailService, IOptions<FtpSettings> ftpSettings)
         {
-            _context = context;
+            _scopeFactory = scopeFactory ?? throw new ArgumentNullException(nameof(scopeFactory));
             _emailService = emailService;
 
             var settings = ftpSettings.Value;
@@ -82,20 +83,21 @@ namespace Inventario.Core.Services.Adq_Serv.AdquisicionService
                     workbook.Save();
                 }
 
-
-
                 SubirArchivoPorFtp(rutaLocalTemporal, nombreArchivoRemoto);
-                var requisicionDb = _context.Requisiciones
-                    .Include(r => r.IdAtencionNavigation)
-                    .FirstOrDefault(r => r.IdRequisicion == idRequisicion);
 
-                if (requisicionDb != null)
+                // Uso de scope temporal para evitar contexto disposed
+                using (var scope = _scopeFactory.CreateScope())
                 {
-                    // 2. Actualizar el campo de estatus (ajusta "Estatus" por el nombre real de tu propiedad)
-                    requisicionDb.Estatus = "EN ESPERA DE SER ATENDIDA";
+                    var context = scope.ServiceProvider.GetRequiredService<InventarioContext>();
+                    var requisicionDb = await context.Requisiciones
+                        .Include(r => r.IdAtencionNavigation)
+                        .FirstOrDefaultAsync(r => r.IdRequisicion == idRequisicion);
 
-                    // 3. Guardar los cambios en la base de datos
-                    await _context.SaveChangesAsync();
+                    if (requisicionDb != null)
+                    {
+                        requisicionDb.Estatus = "EN ESPERA DE SER ATENDIDA";
+                        await context.SaveChangesAsync();
+                    }
                 }
 
                 return rutaLocalTemporal;
@@ -106,21 +108,21 @@ namespace Inventario.Core.Services.Adq_Serv.AdquisicionService
             }
         }
 
-
         public async Task<string> NoAutorizarAsync(string idRequisicion)
         {
-            var requisicionDb = await _context.Requisiciones
-                        .Include(r => r.IdAtencionNavigation)
-                        .FirstOrDefaultAsync(r => r.IdRequisicion == idRequisicion);
-
-            if (requisicionDb != null)
+            using (var scope = _scopeFactory.CreateScope())
             {
-                // Actualizar el campo de estatus
-                requisicionDb.Estatus = "NO AUTORIZADA";
+                var context = scope.ServiceProvider.GetRequiredService<InventarioContext>();
+                var requisicionDb = await context.Requisiciones
+                            .Include(r => r.IdAtencionNavigation)
+                            .FirstOrDefaultAsync(r => r.IdRequisicion == idRequisicion);
 
-                // Guardar los cambios en la base de datos
-                await _context.SaveChangesAsync();
-                return "No se autorizo la requisicion";
+                if (requisicionDb != null)
+                {
+                    requisicionDb.Estatus = "NO AUTORIZADA";
+                    await context.SaveChangesAsync();
+                    return "No se autorizo la requisicion";
+                }
             }
 
             return "No se encontró la requisición";
@@ -146,8 +148,8 @@ namespace Inventario.Core.Services.Adq_Serv.AdquisicionService
 
         public bool NuevaRequisicion(int idSolicitante, int idAutorizante, int idAtencion,
                                    int idUbicacion, DateOnly fechaRequisicion, string tipoRequisicion,
-                                   string empresa, string estatus, string rutaArchivoLocal, 
-                                   string nombreArchivoRemoto, string idEconomico, string gradoPrioridad)
+                                   string empresa, string estatus, string rutaArchivoLocal,
+                                   string nombreArchivoRemoto, string idEconomico, string gradoPrioridad, int consecutivoForzado)
         {
             try
             {
@@ -159,30 +161,35 @@ namespace Inventario.Core.Services.Adq_Serv.AdquisicionService
                 {
                     throw new FileNotFoundException("El archivo local a subir no existe o la ruta está vacía.");
                 }
-                int ultimoConsecutivo = _context.Requisiciones
-                    .Where(r => r.Empresa == empresa && r.IdUbicacion == idUbicacion)
-                    .Select(r => (int?)r.Consecutivo)
-                    .Max() ?? 0;
-                int siguienteConsecutivo = ultimoConsecutivo + 1;
-                string idRequisicionGenerado = $"{empresa} - RC - {siguienteConsecutivo:D3} - {idUbicacion} - {_fechaActual:yyyy}";
-                var nuevaRequisicion = new Requisicione
+
+                string idRequisicionGenerado = $"{empresa} - RC - {consecutivoForzado:D3} - {idUbicacion} - {_fechaActual:yyyy}";
+
+                // Uso de scope temporal exclusivo para guardar la requisición
+                using (var scope = _scopeFactory.CreateScope())
                 {
-                    IdRequisicion = idRequisicionGenerado,
-                    IdUbicacion = idUbicacion,
-                    Consecutivo = siguienteConsecutivo,
-                    FechaRequisicion = fechaRequisicion,
-                    TipoRequisicion = tipoRequisicion,
-                    Empresa = empresa,
-                    Estatus = estatus,
-                    ArchivoReq = nombreArchivoRemoto,
-                    IdSolicitante = idSolicitante,
-                    IdAutorizante = idAutorizante,
-                    IdAtencion = idAtencion,
-                    IdEconomico = idEconomico,
-                    GradoPrioridad = gradoPrioridad
-                };
-                _context.Requisiciones.Add(nuevaRequisicion);
-                _context.SaveChanges();
+                    var context = scope.ServiceProvider.GetRequiredService<InventarioContext>();
+
+                    var nuevaRequisicion = new Requisicione
+                    {
+                        IdRequisicion = idRequisicionGenerado,
+                        IdUbicacion = idUbicacion,
+                        Consecutivo = consecutivoForzado,
+                        FechaRequisicion = fechaRequisicion,
+                        TipoRequisicion = tipoRequisicion,
+                        Empresa = empresa,
+                        Estatus = estatus,
+                        ArchivoReq = nombreArchivoRemoto,
+                        IdSolicitante = idSolicitante,
+                        IdAutorizante = idAutorizante,
+                        IdAtencion = idAtencion,
+                        IdEconomico = idEconomico,
+                        GradoPrioridad = gradoPrioridad
+                    };
+
+                    context.Requisiciones.Add(nuevaRequisicion);
+                    context.SaveChanges();
+                }
+
                 return true;
             }
             catch (Exception ex)
@@ -195,14 +202,18 @@ namespace Inventario.Core.Services.Adq_Serv.AdquisicionService
         {
             try
             {
-                var requisicionDb = await _context.Requisiciones
-                    .FirstOrDefaultAsync(r => r.IdRequisicion == idRequisicion);
-
-                if (requisicionDb != null)
+                using (var scope = _scopeFactory.CreateScope())
                 {
-                    requisicionDb.Estatus = "LIQUIDADA";
-                    await _context.SaveChangesAsync();
-                    return true;
+                    var context = scope.ServiceProvider.GetRequiredService<InventarioContext>();
+                    var requisicionDb = await context.Requisiciones
+                        .FirstOrDefaultAsync(r => r.IdRequisicion == idRequisicion);
+
+                    if (requisicionDb != null)
+                    {
+                        requisicionDb.Estatus = "LIQUIDADA";
+                        await context.SaveChangesAsync();
+                        return true;
+                    }
                 }
 
                 return false;
@@ -217,14 +228,18 @@ namespace Inventario.Core.Services.Adq_Serv.AdquisicionService
         {
             try
             {
-                var requisicionDb = await _context.Requisiciones
-                    .FirstOrDefaultAsync(r => r.IdRequisicion == idRequisicion);
-
-                if (requisicionDb != null)
+                using (var scope = _scopeFactory.CreateScope())
                 {
-                    requisicionDb.Estatus = "EN PROCESO DE SER LIQUIDADA";
-                    await _context.SaveChangesAsync();
-                    return true;
+                    var context = scope.ServiceProvider.GetRequiredService<InventarioContext>();
+                    var requisicionDb = await context.Requisiciones
+                        .FirstOrDefaultAsync(r => r.IdRequisicion == idRequisicion);
+
+                    if (requisicionDb != null)
+                    {
+                        requisicionDb.Estatus = "EN PROCESO DE SER LIQUIDADA";
+                        await context.SaveChangesAsync();
+                        return true;
+                    }
                 }
 
                 return false;
@@ -237,68 +252,79 @@ namespace Inventario.Core.Services.Adq_Serv.AdquisicionService
 
         public async Task<List<RequisicionListDto>> ObtenerRequisicionesAsync(int idUsuario)
         {
-            return await _context.Requisiciones
-                .Where(r => r.IdAutorizante == idUsuario && r.Estatus == "EN ESPERA DE SER AUTORIZADA")
-                .Include(r => r.IdSolicitanteNavigation)
-                .Include(r => r.IdUbicacionNavigation)
-                .Include(r => r.IdAtencionNavigation)
-                .Include(r => r.IdAutorizanteNavigation)
-                .OrderByDescending(r => r.FechaRequisicion)
-                .Select(r => new RequisicionListDto
-                {
-                    IdRequisicion = r.IdRequisicion,
-                    FechaRequisicion = (DateOnly)r.FechaRequisicion,
-                    Empresa = r.Empresa,
-                    IdEconomico = r.IdEconomico,
-                    Estatus = r.Estatus,
-                    TipoRequisicion = r.TipoRequisicion,
-                    GradoPrioridad = r.GradoPrioridad,
-                    Ubicacion = r.IdUbicacionNavigation != null ? r.IdUbicacionNavigation.Ubicacion : "N/A",
-                    Solicitante = r.IdSolicitanteNavigation != null ? r.IdSolicitanteNavigation.NombreCompleto : "N/A",
-                    Autorizante = r.IdAutorizanteNavigation != null ? r.IdAutorizanteNavigation.NombreCompleto : "N/A",
-                    Atencion = r.IdAtencionNavigation != null ? r.IdAtencionNavigation.NombreCompleto : "N/A",
-                    CorreoAtencion = r.IdAtencionNavigation != null ? r.IdAtencionNavigation.Correoe : string.Empty,
-                    CorreoSolicitante = r.IdSolicitanteNavigation != null ? r.IdSolicitanteNavigation.Correoe : string.Empty,
-                    ArchivoReq = r.ArchivoReq
-                })
-                .ToListAsync();
+            using (var scope = _scopeFactory.CreateScope())
+            {
+                var context = scope.ServiceProvider.GetRequiredService<InventarioContext>();
+                return await context.Requisiciones
+                    .Where(r => r.IdAutorizante == idUsuario && r.Estatus == "EN ESPERA DE SER AUTORIZADA")
+                    .Include(r => r.IdSolicitanteNavigation)
+                    .Include(r => r.IdUbicacionNavigation)
+                    .Include(r => r.IdAtencionNavigation)
+                    .Include(r => r.IdAutorizanteNavigation)
+                    .OrderByDescending(r => r.FechaRequisicion)
+                    .Select(r => new RequisicionListDto
+                    {
+                        IdRequisicion = r.IdRequisicion,
+                        FechaRequisicion = (DateOnly)r.FechaRequisicion,
+                        Empresa = r.Empresa,
+                        IdEconomico = r.IdEconomico,
+                        Estatus = r.Estatus,
+                        TipoRequisicion = r.TipoRequisicion,
+                        GradoPrioridad = r.GradoPrioridad,
+                        Ubicacion = r.IdUbicacionNavigation != null ? r.IdUbicacionNavigation.Ubicacion : "N/A",
+                        Solicitante = r.IdSolicitanteNavigation != null ? r.IdSolicitanteNavigation.NombreCompleto : "N/A",
+                        Autorizante = r.IdAutorizanteNavigation != null ? r.IdAutorizanteNavigation.NombreCompleto : "N/A",
+                        Atencion = r.IdAtencionNavigation != null ? r.IdAtencionNavigation.NombreCompleto : "N/A",
+                        CorreoAtencion = r.IdAtencionNavigation != null ? r.IdAtencionNavigation.Correoe : string.Empty,
+                        CorreoSolicitante = r.IdSolicitanteNavigation != null ? r.IdSolicitanteNavigation.Correoe : string.Empty,
+                        ArchivoReq = r.ArchivoReq
+                    })
+                    .ToListAsync();
+            }
         }
 
         public async Task<List<RequisicionListDto>> ObtenerTodasRequisicionesAsync()
         {
-            return await _context.Requisiciones
-                .Where(r => r.Estatus != "FANTASMA")
-                .Include(r => r.IdSolicitanteNavigation)
-                .Include(r => r.IdUbicacionNavigation)
-                .Include(r => r.IdAtencionNavigation)
-                .Include(r => r.IdAutorizanteNavigation)
-                .OrderByDescending(r => r.FechaRequisicion)
-                .Select(r => new RequisicionListDto
-                {
-                    IdRequisicion = r.IdRequisicion,
-                    IdEconomico = r.IdEconomico,
-                    FechaRequisicion = (DateOnly)r.FechaRequisicion,
-                    Empresa = r.Empresa,
-                    GradoPrioridad = r.GradoPrioridad,
-                    Estatus = r.Estatus,
-                    Ubicacion = r.IdUbicacionNavigation != null ? r.IdUbicacionNavigation.Ubicacion: "N/A",
-                    Solicitante = r.IdSolicitanteNavigation != null ? r.IdSolicitanteNavigation.NombreCompleto : "N/A",
-                    Autorizante = r.IdAutorizanteNavigation != null ? r.IdAutorizanteNavigation.NombreCompleto : "N/A",
-                    Atencion = r.IdAtencionNavigation != null ? r.IdAtencionNavigation.NombreCompleto : "N/A",                   
-                    ArchivoReq = r.ArchivoReq
-                })
-                .ToListAsync();
+            using (var scope = _scopeFactory.CreateScope())
+            {
+                var context = scope.ServiceProvider.GetRequiredService<InventarioContext>();
+                return await context.Requisiciones
+                    .Where(r => r.Estatus != "FANTASMA")
+                    .Include(r => r.IdSolicitanteNavigation)
+                    .Include(r => r.IdUbicacionNavigation)
+                    .Include(r => r.IdAtencionNavigation)
+                    .Include(r => r.IdAutorizanteNavigation)
+                    .OrderByDescending(r => r.FechaRequisicion)
+                    .Select(r => new RequisicionListDto
+                    {
+                        IdRequisicion = r.IdRequisicion,
+                        IdEconomico = r.IdEconomico,
+                        FechaRequisicion = (DateOnly)r.FechaRequisicion,
+                        Empresa = r.Empresa,
+                        GradoPrioridad = r.GradoPrioridad,
+                        Estatus = r.Estatus,
+                        Ubicacion = r.IdUbicacionNavigation != null ? r.IdUbicacionNavigation.Ubicacion : "N/A",
+                        Solicitante = r.IdSolicitanteNavigation != null ? r.IdSolicitanteNavigation.NombreCompleto : "N/A",
+                        Autorizante = r.IdAutorizanteNavigation != null ? r.IdAutorizanteNavigation.NombreCompleto : "N/A",
+                        Atencion = r.IdAtencionNavigation != null ? r.IdAtencionNavigation.NombreCompleto : "N/A",
+                        ArchivoReq = r.ArchivoReq
+                    })
+                    .ToListAsync();
+            }
         }
 
         public async Task<List<Requisicione>> ObtenerRequisicionesPorIdsAsync(string[] ids)
         {
-            return await _context.Requisiciones
-                .Where(r => ids.Contains(r.IdRequisicion))
-                .Include(r => r.IdSolicitanteNavigation)
-                .Include(r => r.IdUbicacionNavigation)
-                .ToListAsync();
+            using (var scope = _scopeFactory.CreateScope())
+            {
+                var context = scope.ServiceProvider.GetRequiredService<InventarioContext>();
+                return await context.Requisiciones
+                    .Where(r => ids.Contains(r.IdRequisicion))
+                    .Include(r => r.IdSolicitanteNavigation)
+                    .Include(r => r.IdUbicacionNavigation)
+                    .ToListAsync();
+            }
         }
-
 
         public void DescargarYAbrirArchivoExcel(string nombreArchivoRemoto)
         {
