@@ -38,7 +38,7 @@ namespace Inventario.Core.Services.Economicos
                 Anotaciones = dto.Anotaciones,
                 Horaskilometrosreales = dto.Horaskilometrosreales,
                 Costos = dto.Costos,
-                UbicacionRealizacion = economicoReal?.IdUbicacion, 
+                UbicacionRealizacion = dto.UbicacionRealizacion, 
                 IdUsuario = dto.IdUsuario,
                 IdGrupo = economicoReal?.IdGrupo                   
             };

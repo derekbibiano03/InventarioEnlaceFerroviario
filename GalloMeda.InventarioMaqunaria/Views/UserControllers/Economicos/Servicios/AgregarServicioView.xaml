@@ -165,6 +165,14 @@
                             <TextBox Text="{Binding Horaskilometrosreales, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
                         </StackPanel>
 
+                        <StackPanel Grid.Row="2" Grid.Column="0" Margin="0,0,0,15">
+                            <TextBlock Text="Ubicacion:" Style="{StaticResource LabelStyle}"/>
+                            <ComboBox ItemsSource="{Binding Ubicaciones}"
+                                  DisplayMemberPath="NombreProyecto"
+                                  SelectedValuePath="IdUbicacion"
+                                  SelectedValue="{Binding IdUbicacion, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
+                        </StackPanel>
+
                         <StackPanel Grid.Row="2" Grid.Column="2" Margin="0,0,0,15">
                             <TextBlock Text="Costo de Servicio:" Style="{StaticResource LabelStyle}"/>
                             <TextBox Text="{Binding Costos, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>

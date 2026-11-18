@@ -71,6 +71,13 @@ namespace Inventario.Desktop.ViewModels.EconomicosViewModel.Servicios
             set { _noEconomico = value; OnPropertyChanged(); }
         }
 
+        private int _idUbicacion;
+        public int IdUbicacion
+        {
+            get => _idUbicacion;
+            set { _idUbicacion = value; OnPropertyChanged(); }
+        }
+
         private DateTime? _fechaMantenimiento = DateTime.Today;
         public DateTime? FechaMantenimiento
         {
@@ -359,6 +366,7 @@ namespace Inventario.Desktop.ViewModels.EconomicosViewModel.Servicios
                     Anotaciones = this.Anotaciones,
                     Horaskilometrosreales = this.Horaskilometrosreales,
                     Costos = this.Costos,
+                    UbicacionRealizacion = this.IdUbicacion,
                     IdUsuario = App.Session.IdUsuario
                 };
 
