@@ -25,7 +25,14 @@ namespace Inventario.Desktop
 
         public void Execute(object? parameter)
         {
-            _execute((T)parameter!);
+            if (parameter is T typedParam)
+            {
+                _execute(typedParam);
+            }
+            else if (parameter == null && default(T) == null)
+            {
+                _execute(default!);
+            }
         }
 
         public event EventHandler? CanExecuteChanged

@@ -58,7 +58,7 @@
                     <TextBox Text="{Binding NombreMarca, UpdateSourceTrigger=PropertyChanged}" HorizontalAlignment="Left" Width="250" Height="30" Margin="0,0,0,10"/>
 
                     <Button 
-                        Content="Registrar Grupo" 
+                        Content="Registrar Marca" 
                         Command="{Binding RegistrarMarcaCommand}" 
                         Width="150" 
                         Height="35" 

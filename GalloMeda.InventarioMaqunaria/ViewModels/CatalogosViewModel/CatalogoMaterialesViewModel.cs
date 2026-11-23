@@ -46,21 +46,18 @@ namespace Inventario.Desktop.ViewModels.CatalogosViewModel
         }
 
         private string _busquedaDescripcion = string.Empty;
-        private string _busquedaMarca = string.Empty;
         private string _busquedaNoParte = string.Empty;
         private string _busquedaClasificacion = string.Empty;
         private string _busquedaSubclasificacion = string.Empty;
         private string _busquedaGrupo = string.Empty;
 
         private readonly Dictionary<string, bool> _estadosDescripcion = new();
-        private readonly Dictionary<string, bool> _estadosMarca = new();
         private readonly Dictionary<string, bool> _estadosNoParte = new();
         private readonly Dictionary<string, bool> _estadosClasificacion = new();
         private readonly Dictionary<string, bool> _estadosSubclasificacion = new();
         private readonly Dictionary<string, bool> _estadosGrupo = new();
 
         public ObservableCollection<OpcionFiltroCheckbox> FiltroDescripcionesOpciones { get; set; } = new();
-        public ObservableCollection<OpcionFiltroCheckbox> FiltroMarcasOpciones { get; set; } = new();
         public ObservableCollection<OpcionFiltroCheckbox> FiltroNoParteOpciones { get; set; } = new();
         public ObservableCollection<OpcionFiltroCheckbox> FiltroClasificacionesOpciones { get; set; } = new();
         public ObservableCollection<OpcionFiltroCheckbox> FiltroSubclasificacionesOpciones { get; set; } = new();
@@ -74,11 +71,6 @@ namespace Inventario.Desktop.ViewModels.CatalogosViewModel
             set { _busquedaDescripcion = value; OnPropertyChanged(); FiltrarListaCheckboxes(FiltroDescripcionesOpciones, _busquedaDescripcion); }
         }
 
-        public string BusquedaMarca
-        {
-            get => _busquedaMarca;
-            set { _busquedaMarca = value; OnPropertyChanged(); FiltrarListaCheckboxes(FiltroMarcasOpciones, _busquedaMarca); }
-        }
 
         public string BusquedaNoParte
         {
@@ -113,7 +105,6 @@ namespace Inventario.Desktop.ViewModels.CatalogosViewModel
         public ObservableCollection<CatalogoGrupo> ListaGrupos { get; set; } = new();
         public ObservableCollection<CatalogoClasificacione> ListaClasificaciones { get; set; } = new();
         public ObservableCollection<CatalogoSubclasificacione> ListaSubclasificaciones { get; set; } = new();
-        public ObservableCollection<CatalogoMarca> ListaMarcas { get; set; } = new();
 
         public CatalogoMaterialesViewModel()
         {
@@ -135,7 +126,6 @@ namespace Inventario.Desktop.ViewModels.CatalogosViewModel
             ListaGrupos = new ObservableCollection<CatalogoGrupo>(_context.CatalogoGrupos.ToList());
             ListaClasificaciones = new ObservableCollection<CatalogoClasificacione>(_context.CatalogoClasificaciones.ToList());
             ListaSubclasificaciones = new ObservableCollection<CatalogoSubclasificacione>(_context.CatalogoSubclasificaciones.ToList());
-            ListaMarcas = new ObservableCollection<CatalogoMarca>(_context.CatalogoMarcas.ToList());
 
             var datosmateriales = _catalogoMaterialesService.ObtenerMaterialInfo();
             Materiales = new ObservableCollection<MaterialesDto>(datosmateriales);
@@ -164,10 +154,6 @@ namespace Inventario.Desktop.ViewModels.CatalogosViewModel
 
             var descripcionesSeleccionadas = _estadosDescripcion.Where(x => x.Value).Select(x => x.Key).ToList();
             if (descripcionesSeleccionadas.Any() && (string.IsNullOrEmpty(material.DescripcionCorta) || !descripcionesSeleccionadas.Contains(material.DescripcionCorta)))
-                return false;
-
-            var marcasSeleccionadas = _estadosMarca.Where(x => x.Value).Select(x => x.Key).ToList();
-            if (marcasSeleccionadas.Any() && (string.IsNullOrEmpty(material.Marca) || !marcasSeleccionadas.Contains(material.Marca)))
                 return false;
 
             var noPartesSeleccionadas = _estadosNoParte.Where(x => x.Value).Select(x => x.Key).ToList();
@@ -207,20 +193,6 @@ namespace Inventario.Desktop.ViewModels.CatalogosViewModel
                     FiltroDescripcionesOpciones.Add(new OpcionFiltroCheckbox { Nombre = d!, IsChecked = _estadosDescripcion[d!], AlCambiarSeleccion = () => NotificarCheckboxCambiado("DESCRIPCION", d!, null) });
                 }
                 FiltrarListaCheckboxes(FiltroDescripcionesOpciones, BusquedaDescripcion);
-            }
-
-            if (columnaExcluida != "MARCA")
-            {
-                var marcasVisibles = itemsVisibles.Select(e => e.Marca).Where(s => !string.IsNullOrEmpty(s)).Distinct().ToList();
-                FiltroMarcasOpciones.Clear();
-                var marcasAMostrar = _estadosMarca.Where(x => x.Value).Select(x => x.Key).Union(marcasVisibles).Distinct();
-                foreach (var idM in marcasAMostrar)
-                {
-                    var nombreM = idM ?? "Sin Marca";
-                    _estadosMarca.TryAdd(idM, false);
-                    FiltroMarcasOpciones.Add(new OpcionFiltroCheckbox { IdString = idM, Nombre = nombreM, IsChecked = _estadosMarca[idM], AlCambiarSeleccion = () => NotificarCheckboxCambiado("MARCA", null, idM) });
-                }
-                FiltrarListaCheckboxes(FiltroMarcasOpciones, BusquedaMarca);
             }
 
             if (columnaExcluida != "NO PARTE")
@@ -295,8 +267,6 @@ namespace Inventario.Desktop.ViewModels.CatalogosViewModel
 
             if (claveStringId != null)
             {
-                if (columnaOrigen == "MARCA" && FiltroMarcasOpciones.FirstOrDefault(x => x.IdString == claveStringId) is { } marcaOpt)
-                    _estadosMarca[claveStringId] = marcaOpt.IsChecked;
                 if (columnaOrigen == "CLASIFICACION" && FiltroClasificacionesOpciones.FirstOrDefault(x => x.IdString == claveStringId) is { } ubOpt)
                     _estadosClasificacion[claveStringId] = ubOpt.IsChecked;
                 if (columnaOrigen == "SUBCLASIFICACION" && FiltroSubclasificacionesOpciones.FirstOrDefault(x => x.IdString == claveStringId) is { } subOpt)
@@ -312,14 +282,12 @@ namespace Inventario.Desktop.ViewModels.CatalogosViewModel
         private void LimpiarFiltros()
         {
             _estadosDescripcion.Clear();
-            _estadosMarca.Clear();
             _estadosNoParte.Clear();
             _estadosClasificacion.Clear();
             _estadosSubclasificacion.Clear();
             _estadosGrupo.Clear();
 
             BusquedaDescripcion = string.Empty;
-            BusquedaMarca = string.Empty;
             BusquedaNoParte = string.Empty;
             BusquedaClasificacion = string.Empty;
             BusquedaSubclasificacion = string.Empty;

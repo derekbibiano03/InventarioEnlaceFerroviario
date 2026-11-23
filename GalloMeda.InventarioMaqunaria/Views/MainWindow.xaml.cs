@@ -220,11 +220,8 @@ namespace Inventario.Desktop.Views
         {
             try
             {
-                // 1. Obtener la versión actual del ensamblado instalado (ej. 1.0.0.0)
                 Version versionActual = Assembly.GetExecutingAssembly().GetName().Version;
-
-                // 2. Consultar la última versión desde la API de GitHub Releases
-                string urlApi = "https://api.github.com/repos/derekbibiano03/Inventario/releases/latest";
+                string urlApi = "https://github.com/derekbibiano03/InventarioEnlaceFerroviario/releases/latest";
 
                 using (var client = new System.Net.Http.HttpClient())
                 {
@@ -265,7 +262,6 @@ namespace Inventario.Desktop.Views
                     int minorActual = versionActual.Minor;
                     long timestampActual = versionActual.Build > 0 ? versionActual.Build : 0;
 
-                    // 4. Lógica de comparación personalizada
                     bool hayNuevaVersion = false;
 
                     if (majorRemoto > majorActual)
@@ -278,7 +274,6 @@ namespace Inventario.Desktop.Views
                     }
                     else if (majorRemoto == majorActual && minorRemoto == minorActual)
                     {
-                        // Si el timestamp del servidor es mayor al build actual, hay actualización
                         hayNuevaVersion = timestampRemoto > timestampActual;
                     }
 
@@ -294,7 +289,7 @@ namespace Inventario.Desktop.Views
                         {
                             System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo
                             {
-                                FileName = $"https://github.com/derekbibiano03/Inventario/releases/latest",
+                                FileName = $"https://github.com/derekbibiano03/InventarioEnlaceFerroviario/releases/latest",
                                 UseShellExecute = true
                             });
                         }

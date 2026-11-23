@@ -48,7 +48,7 @@
                             <RowDefinition Height="Auto"/>
                             <RowDefinition Height="Auto"/>
                         </Grid.RowDefinitions>
-                        <!---->
+
                         <TextBlock Grid.Row="0" Grid.Column="0" Text="Descripción:" FontWeight="SemiBold" Margin="0,4"/>
                         <TextBlock Grid.Row="0" Grid.Column="1" HorizontalAlignment="Left" Text="{Binding Detalle.Descripcion}" TextWrapping="Wrap" Margin="0,4" />
 

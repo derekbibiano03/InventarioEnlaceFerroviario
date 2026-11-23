@@ -15,11 +15,18 @@ namespace Inventario.Desktop.Views.UserControllers.Adquisiciones_Servicios.Requi
             {
                 var viewModel = scope.ServiceProvider.GetRequiredService<AgregarRequisicionViewModel>();
 
-                viewModel.OnRegistroRequisicionCompletado = () =>
+                viewModel.RequisicionRegistrada += (s, args) =>
                 {
-                    if (this.Parent is ContentControl parentControl)
+                    var nuevaVista = new BuscarRequisicionView();
+
+                    if (this.Parent is ContentControl contenedor)
                     {
-                        parentControl.Content = new BuscarRequisicionView();
+                        contenedor.Content = nuevaVista;
+                    }
+                    else if (this.Parent is Panel panel)
+                    {
+                        panel.Children.Clear();
+                        panel.Children.Add(nuevaVista);
                     }
                 };
 

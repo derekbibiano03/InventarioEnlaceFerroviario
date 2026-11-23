@@ -17,7 +17,6 @@ namespace Inventario.Core.Services.Catalogos
         public List<MaterialesDto> ObtenerMaterialInfo ()
         {
             var resultado = _context.CatalogoMateriales
-                .Include(e => e.MarcaNavigation)
                 .Include(e => e.IdClasificacionNavigation)
                 .Include(e => e.IdSubclasificacionNavigation)
                 .Include(e => e.IdGrupoNavigation)
@@ -26,7 +25,6 @@ namespace Inventario.Core.Services.Catalogos
                     IdMaterial = e.IdMaterial,
                     DescripcionCorta = e.DescripcionCorta,
                     DescripcionLarga = e.DescripcionLarga,
-                    Marca = e.MarcaNavigation != null ? e.MarcaNavigation.NombreMarca : "SIN MARCA",
                     NoParte = e.NoParte,
                     UnidadMedida = e.UnidadMedida,
                     Detalles = e.Detalles,

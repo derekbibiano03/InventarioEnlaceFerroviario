@@ -156,22 +156,6 @@
                         </DataGridTextColumn.HeaderTemplate>
                     </DataGridTextColumn>
 
-                    <!-- Marca -->
-                    <!-- Marca -->
-                    <DataGridTextColumn Width="140" Binding="{Binding Marca}" IsReadOnly="True">
-                        <DataGridTextColumn.HeaderTemplate>
-                            <DataTemplate>
-                                <StackPanel Orientation="Vertical">
-                                    <TextBlock Text="Marca" HorizontalAlignment="Center" Margin="0,0,0,4"/>
-                                    <ComboBox Width="100" 
-                          Template="{StaticResource FiltroExcelComboBoxTemplate}"
-                          Tag="{Binding DataContext.BusquedaMarca, RelativeSource={RelativeSource AncestorType=UserControl}, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
-                          ItemsSource="{Binding DataContext.FiltroMarcasOpciones, RelativeSource={RelativeSource AncestorType=UserControl}}"
-                          ItemTemplate="{StaticResource ItemFiltroCheckBoxTemplate}"/>
-                                </StackPanel>
-                            </DataTemplate>
-                        </DataGridTextColumn.HeaderTemplate>
-                    </DataGridTextColumn>
 
                     <!-- No. de Parte -->
                     <DataGridTextColumn Width="140" Binding="{Binding NoParte}" IsReadOnly="True">

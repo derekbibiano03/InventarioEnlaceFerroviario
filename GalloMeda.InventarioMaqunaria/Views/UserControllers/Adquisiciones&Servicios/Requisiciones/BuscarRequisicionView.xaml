@@ -364,7 +364,7 @@ ToolTip="Buscar..." Margin="0,0,0,5"/>
                 </DataGridTemplateColumn>
 
             </DataGrid.Columns>
-        
+
         </DataGrid>
     </Grid>
 </UserControl>

@@ -716,7 +716,6 @@ namespace Inventario.Desktop.ViewModels.AdqServ
 
                     MessageBox.Show("Requisición guardada en el servidor FTP y en la base de datos exitosamente.", "Éxito", MessageBoxButton.OK, MessageBoxImage.Information);
                     RequisicionRegistrada?.Invoke(this, EventArgs.Empty);
-                    _onRegistroRequisicionCompletado?.Invoke();
                 }
             }
             catch (Exception ex)
